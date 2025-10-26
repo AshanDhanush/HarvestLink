@@ -1,5 +1,5 @@
 package com.HarvestLink.api.model.dto;
-import com.HarvestLink.api.model.entity.Role;
+import com.HarvestLink.api.util.Role;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
