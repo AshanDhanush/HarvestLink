@@ -1,6 +1,6 @@
-package com.HarvestLink.api.dto;
+package com.HarvestLink.api.model.dto;
+import com.HarvestLink.api.model.entity.Role;
 
-import com.HarvestLink.api.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
-    private String id;
+public class RegisterRequest {
     private String firstName;
     private String lastName;
     private String email;
+    private String password;
+    private Role role;
     private String contactNo;
     private String address;
-    private Role role;
 }

@@ -15,14 +15,14 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import com.HarvestLink.api.security.JwtService;
+import com.HarvestLink.api.service.impl.JwtServiceImpl;
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
+    private final JwtServiceImpl jwtService;
     private final UserDetailsService userDetailsService;
 
     @Override

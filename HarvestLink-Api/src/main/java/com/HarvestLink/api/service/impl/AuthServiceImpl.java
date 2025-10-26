@@ -1,12 +1,11 @@
 package com.HarvestLink.api.service.impl;
 
-import com.HarvestLink.api.dto.AuthResponse;
-import com.HarvestLink.api.dto.LoginRequest;
-import com.HarvestLink.api.dto.RegisterRequest;
-import com.HarvestLink.api.dto.UserDto;
-import com.HarvestLink.api.entity.User;
+import com.HarvestLink.api.model.dto.AuthResponse;
+import com.HarvestLink.api.model.dto.LoginRequest;
+import com.HarvestLink.api.model.dto.RegisterRequest;
+import com.HarvestLink.api.model.dto.UserDto;
+import com.HarvestLink.api.model.entity.User;
 import com.HarvestLink.api.repository.UserRepository;
-import com.HarvestLink.api.security.JwtService;
 import com.HarvestLink.api.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,7 +20,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+    private final JwtServiceImpl jwtService;
     private final AuthenticationManager authenticationManager;
 
     @Override

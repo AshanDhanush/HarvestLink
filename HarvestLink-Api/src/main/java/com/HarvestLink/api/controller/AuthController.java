@@ -1,8 +1,8 @@
 package com.HarvestLink.api.controller;
 
-import com.HarvestLink.api.dto.AuthResponse;
-import com.HarvestLink.api.dto.LoginRequest;
-import com.HarvestLink.api.dto.RegisterRequest;
+import com.HarvestLink.api.model.dto.AuthResponse;
+import com.HarvestLink.api.model.dto.LoginRequest;
+import com.HarvestLink.api.model.dto.RegisterRequest;
 import com.HarvestLink.api.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

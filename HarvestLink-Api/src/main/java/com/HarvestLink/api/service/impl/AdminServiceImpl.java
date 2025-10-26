@@ -1,6 +1,6 @@
 package com.HarvestLink.api.service.impl;
 
-import com.HarvestLink.api.dto.UserDto;
+import com.HarvestLink.api.model.dto.UserDto;
 import com.HarvestLink.api.repository.UserRepository;
 import com.HarvestLink.api.service.AdminService;
 import lombok.RequiredArgsConstructor;

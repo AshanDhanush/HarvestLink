@@ -1,6 +1,6 @@
 package com.HarvestLink.api.controller;
 
-import com.HarvestLink.api.dto.UserDto;
+import com.HarvestLink.api.model.dto.UserDto;
 import com.HarvestLink.api.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

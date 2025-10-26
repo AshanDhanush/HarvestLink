@@ -1,4 +1,4 @@
-package com.HarvestLink.api.entity;
+package com.HarvestLink.api.model.entity;
 
 public enum Role {
     FARMER,

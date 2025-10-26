@@ -1,7 +1,7 @@
 package com.HarvestLink.api;
 
-import com.HarvestLink.api.entity.Role;
-import com.HarvestLink.api.entity.User;
+import com.HarvestLink.api.model.entity.Role;
+import com.HarvestLink.api.model.entity.User;
 import com.HarvestLink.api.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
