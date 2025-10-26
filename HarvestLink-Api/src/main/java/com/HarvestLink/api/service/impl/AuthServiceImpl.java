@@ -1,5 +1,6 @@
 package com.HarvestLink.api.service.impl;
 
+import com.HarvestLink.api.dto.AdminLoginRequest;
 import com.HarvestLink.api.dto.AuthResponse;
 import com.HarvestLink.api.dto.LoginRequest;
 import com.HarvestLink.api.dto.RegisterRequest;
@@ -10,6 +11,7 @@ import com.HarvestLink.api.security.JwtService;
 import com.HarvestLink.api.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -67,6 +69,33 @@ public class AuthServiceImpl implements AuthService {
 
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + request.getEmail()));
+
+        var jwtToken = jwtService.generateToken(user);
+
+        var userDto = UserDto.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .contactNo(user.getContactNo())
+                .address(user.getAddress())
+                .role(user.getRole())
+                .build();
+
+        return AuthResponse.builder()
+                .token(jwtToken)
+                .user(userDto)
+                .build();
+    }
+
+    @Override
+    public AuthResponse adminLogin(AdminLoginRequest request) {
+        if (!"adminhl".equals(request.getUsername()) || !"789456".equals(request.getPassword())) {
+            throw new BadCredentialsException("Invalid admin credentials");
+        }
+
+        var user = userRepository.findByEmail("adminhl@harvestlink.com")
+                .orElseThrow(() -> new UsernameNotFoundException("Admin user not found"));
 
         var jwtToken = jwtService.generateToken(user);
 

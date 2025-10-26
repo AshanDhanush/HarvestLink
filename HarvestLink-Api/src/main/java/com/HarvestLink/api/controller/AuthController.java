@@ -1,5 +1,6 @@
 package com.HarvestLink.api.controller;
 
+import com.HarvestLink.api.dto.AdminLoginRequest;
 import com.HarvestLink.api.dto.AuthResponse;
 import com.HarvestLink.api.dto.LoginRequest;
 import com.HarvestLink.api.dto.RegisterRequest;
@@ -26,5 +27,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/admin/login")
+    public ResponseEntity<AuthResponse> adminLogin(@RequestBody AdminLoginRequest request) {
+        return ResponseEntity.ok(authService.adminLogin(request));
     }
 }
