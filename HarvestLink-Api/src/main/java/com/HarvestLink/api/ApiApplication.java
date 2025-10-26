@@ -3,6 +3,8 @@ package com.HarvestLink.api;
 import com.HarvestLink.api.model.entity.Role;
 import com.HarvestLink.api.model.entity.User;
 import com.HarvestLink.api.repository.UserRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,6 +20,7 @@ public class ApiApplication {
 
 	@Bean
 	public CommandLineRunner commandLineRunner(
+			@Autowired
 			UserRepository userRepository,
 			PasswordEncoder passwordEncoder
 	) {
