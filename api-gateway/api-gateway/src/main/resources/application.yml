@@ -1,0 +1,17 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: http://localhost:8080   # User Service port
+          predicates:
+            - Path=/api/v1/**          # match your AuthController path
+          filters:
+            - AddResponseHeader=X-Response-Time, "Gateway"
+
