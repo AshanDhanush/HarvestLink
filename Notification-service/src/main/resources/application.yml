@@ -1,0 +1,7 @@
+server:
+  port: 8084
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://ashandhanushka:Mashi123@tablex.q2ab2lu.mongodb.net/product_db?retryWrites=true&w=majority
