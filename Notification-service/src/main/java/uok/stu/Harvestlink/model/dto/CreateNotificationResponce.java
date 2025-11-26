@@ -8,9 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 
-public class EmailDto {
-    private String to;
-    private String subject;
-    private String body;
-    private String filepath;
+public class CreateNotificationResponce {
+    private String id;
+    private String status;
 }

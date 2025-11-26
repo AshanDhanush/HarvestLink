@@ -4,4 +4,19 @@ server:
 spring:
   data:
     mongodb:
-      uri: mongodb+srv://ashandhanushka:Mashi123@tablex.q2ab2lu.mongodb.net/product_db?retryWrites=true&w=majority
+      uri: mongodb+srv://ashandhanushka:Mashi123@tablex.q2ab2lu.mongodb.net/notification_db?retryWrites=true&w=majority
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: yourgmail@gmail.com
+    password: YOUR-GOOGLE-APP-PASSWORD # Must be an App Password
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+  rabbitmq: # Default RabbitMQ config
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
