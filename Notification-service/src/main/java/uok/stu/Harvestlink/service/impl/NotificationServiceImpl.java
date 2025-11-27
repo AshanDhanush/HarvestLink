@@ -1,6 +1,7 @@
 package uok.stu.Harvestlink.service.impl;
 
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uok.stu.Harvestlink.model.dto.CreateNotificationRequest;
 import uok.stu.Harvestlink.model.dto.CreateNotificationResponce;
@@ -8,78 +9,119 @@ import uok.stu.Harvestlink.model.entity.Notification;
 import uok.stu.Harvestlink.repository.NotificationRepository;
 import uok.stu.Harvestlink.service.NotificationService;
 import uok.stu.Harvestlink.service.NotificationSender;
-import uok.stu.Harvestlink.util.IdempotencyUtil; // <-- ADDED IMPORT
+import uok.stu.Harvestlink.service.SMTPEmailService;
+import uok.stu.Harvestlink.util.IdempotencyUtil;
 
 import java.time.LocalDateTime;
+import java.util.UUID; // Import UUID
 
 @Service
-@RequiredArgsConstructor
+@Slf4j
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository repo;
     private final NotificationSender sender;
+    private final SMTPEmailService emailService;
+
+    public NotificationServiceImpl(NotificationRepository repo,
+                                   @Autowired(required = false) NotificationSender sender,
+                                   SMTPEmailService emailService) {
+        this.repo = repo;
+        this.sender = sender;
+        this.emailService = emailService;
+    }
 
     @Override
     public CreateNotificationResponce create(CreateNotificationRequest req) {
+        log.info("🔔 CREATE NOTIFICATION REQUEST RECEIVED");
+        log.info("UserId: {}, Channel: {}, ToUser: {}", req.getUserId(), req.getChannel(), req.getToUser());
 
-        // 1. Determine the final idempotency key
         String finalIdempotencyKey = req.getIdempotencyKey();
 
-        // If the key is null or invalid, generate one based on request content
+        // CHANGED: If key is missing, generate a RANDOM UNIQUE key (UUID)
+        // This prevents "Duplicate notification detected" errors for identical requests
         if (finalIdempotencyKey == null || !IdempotencyUtil.isValidKey(finalIdempotencyKey)) {
-
-            // Build a unique string from all relevant fields (content, recipient, type)
-            StringBuilder inputBuilder = new StringBuilder();
-            inputBuilder.append(req.getUserId());
-            inputBuilder.append(req.getChannel());
-            inputBuilder.append(req.getToUser());
-            inputBuilder.append(req.getSubject());
-            inputBuilder.append(req.getBody());
-
-            // Convert Map payload to string for key generation
-            if (req.getPayload() != null) {
-                inputBuilder.append(req.getPayload().toString());
-            }
-
-            finalIdempotencyKey = IdempotencyUtil.generateKey(inputBuilder.toString()); // <-- UTIL CLASS USED
+            finalIdempotencyKey = UUID.randomUUID().toString();
+            log.info("🔑 Auto-generated unique key: {}", finalIdempotencyKey);
         }
 
-        // 2. Perform idempotency check using the determined key
+        // Check for duplicates (This checks if the *UUID* specifically exists, which is unlikely now)
         if (finalIdempotencyKey != null) {
             var existing = repo.findByIdempotencyKey(finalIdempotencyKey);
             if (existing.isPresent()) {
-                // Return existing status if request is a duplicate
+                log.info("⚠️ Duplicate notification detected with key: {}", finalIdempotencyKey);
                 return new CreateNotificationResponce(existing.get().getId(), existing.get().getStatus());
             }
         }
 
-        // 3. Create and save new notification entity
         Notification notif = Notification.builder()
                 .userId(req.getUserId())
                 .channel(req.getChannel())
                 .payload(req.getPayload())
-                .idempotencyKey(finalIdempotencyKey) // Store the generated/provided key
-
-                // Email Specific Mapping
+                .idempotencyKey(finalIdempotencyKey)
                 .toUser(req.getToUser())
                 .subject(req.getSubject())
                 .body(req.getBody())
                 .attachmentName(req.getAttachmentName())
                 .attachmentData(req.getAttachmentData())
-
                 .status("queued")
                 .attempts(0)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
 
+        log.info("💾 Saving notification to database...");
         Notification saved = repo.save(notif);
+        log.info("✅ Notification saved with ID: {}", saved.getId());
 
-        // 4. Publish to queue
+        // Send Logic (Direct fallback if RabbitMQ is disabled)
         if ("email".equalsIgnoreCase(saved.getChannel())) {
-            sender.sendToQueue(saved);
+            if (sender != null) {
+                log.info("📤 Publishing notification to RabbitMQ queue...");
+                sender.sendToQueue(saved);
+                log.info("✅ Notification published to queue");
+            } else {
+                log.warn("⚠️ RabbitMQ is disabled. Switching to DIRECT EMAIL sending.");
+                sendEmailDirectly(saved);
+            }
+        } else {
+            log.warn("⚠️ Unsupported channel: {}", saved.getChannel());
         }
 
         return new CreateNotificationResponce(saved.getId(), saved.getStatus());
+    }
+
+    // Inside NotificationServiceImpl.java
+
+    private void sendEmailDirectly(Notification notification) {
+        try {
+            // Check if attachment exists in the saved notification
+            boolean hasAttachment = notification.getAttachmentData() != null
+                    && notification.getAttachmentData().length > 0
+                    && notification.getAttachmentName() != null;
+
+            if (hasAttachment) {
+                log.info("Directly sending email with attachment: {}", notification.getAttachmentName());
+
+                // Call the method in SmtpEmailServiceImpl
+                emailService.sendEmailWithAttachment(
+                        notification.getToUser(),
+                        notification.getSubject(),
+                        notification.getBody(),
+                        notification.getAttachmentName(), // Name from request
+                        notification.getAttachmentData()  // Byte array from request
+                );
+            } else {
+                log.info("Directly sending plain email without attachment");
+
+                // This method is called for plain emails
+                emailService.sendEmail(
+                        notification.getToUser(),
+                        notification.getSubject(),
+                        notification.getBody());
+            }
+        } catch (Exception e) {
+            log.error("❌ Failed to send direct email", e);
+        }
     }
 }

@@ -1,55 +1,59 @@
+
 package uok.stu.Harvestlink.consumer;
 
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import uok.stu.Harvestlink.config.RabbitConfig;
 import uok.stu.Harvestlink.model.entity.Notification;
-import uok.stu.Harvestlink.repository.NotificationRepository;
 import uok.stu.Harvestlink.service.SMTPEmailService;
 
-import java.time.LocalDateTime;
-
-@Service
+@Component
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationConsumer {
 
-    private final NotificationRepository repo;
-    private final SMTPEmailService SMTPEmailService;
+    private final SMTPEmailService emailService;
 
-    @RabbitListener(queues = "notification.email.queue")
-    public void listenEmail(Notification n) {
+    @RabbitListener(queues = RabbitConfig.QUEUE_EMAIL)
+    public void listenEmail(Notification notification) {
+        log.info("========================================");
+        log.info("📧 Received notification from queue!");
+        log.info("ID: {}", notification.getId());
+        log.info("To: {}", notification.getToUser());
+        log.info("Subject: {}", notification.getSubject());
+        log.info("========================================");
 
         try {
-            System.out.println("Attempting to send email to: " + n.getToUser());
+            // Check if notification has attachment
+            boolean hasAttachment = notification.getAttachmentData() != null
+                    && notification.getAttachmentData().length > 0
+                    && notification.getAttachmentName() != null;
 
-            // Calls the service, which handles the attachment presence
-            SMTPEmailService.sendEmailWithAttachment(
-                    n.getToUser(),
-                    n.getSubject(),
-                    n.getBody(),
-                    n.getAttachmentName(),
-                    n.getAttachmentData()
-            );
+            if (hasAttachment) {
+                log.info("Sending email with attachment: {}", notification.getAttachmentName());
+                emailService.sendEmailWithAttachment(
+                        notification.getToUser(),
+                        notification.getSubject(),
+                        notification.getBody(),
+                        notification.getAttachmentName(),
+                        notification.getAttachmentData()
+                );
+            } else {
+                log.info("Sending plain email without attachment");
+                emailService.sendEmail(
+                        notification.getToUser(),
+                        notification.getSubject(),
+                        notification.getBody()
+                );
+            }
 
-            // Update status on success
-            n.setStatus("delivered");
-            n.setLastError(null);
-            n.setUpdatedAt(LocalDateTime.now());
-            repo.save(n);
-            System.out.println("Email successfully sent and status updated for ID: " + n.getId());
+            log.info("✅ Email sent successfully for notification: {}", notification.getId());
 
-        } catch (MessagingException e) {
-            // Update status on failure (will be retried/dead-lettered by RabbitMQ)
-            System.err.println("Email sending failed for ID " + n.getId() + ": " + e.getMessage());
-            n.setStatus("failed");
-            n.setAttempts(n.getAttempts() + 1);
-            n.setLastError(e.getMessage());
-            n.setUpdatedAt(LocalDateTime.now());
-            repo.save(n);
-
-            // Re-throw RuntimeException to trigger RabbitMQ retry/DLQ logic
-            throw new RuntimeException("Email failed, attempting retry/DLQ logic.", e);
+        } catch (Exception e) {
+            log.error("❌ Failed to process notification: {}", notification.getId(), e);
+            throw new RuntimeException("Failed to send email notification", e);
         }
     }
 }
