@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  
+  --color-harvest-primary: #98C040;
+  --color-harvest-primary-hover: #65a30d;
+  --color-harvest-dark: #23532B;
+  --color-harvest-text: #1a2e05;
+  --color-harvest-bg-light: #f7fee7;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--color-harvest-text);
+}
