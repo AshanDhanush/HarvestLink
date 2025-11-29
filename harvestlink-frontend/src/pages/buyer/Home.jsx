@@ -4,6 +4,10 @@ import TopBar from "../../components/layout/Topbar";
 import Footer from "../../components/layout/Footer";
 import Hero from "../../components/home/Hero";
 import Features from "../../components/home/Features";
+import FAQ from "../../components/home/FAQ";
+import ContactSection from "../../components/home/ContactSection";
+
+
 
 const Home = () => {
   return (
@@ -13,6 +17,9 @@ const Home = () => {
 
       <Hero />
       <Features />
+      <FAQ />
+      <ContactSection />
+      
       
       <Footer />
     </>

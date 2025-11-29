@@ -1,20 +1,27 @@
 import React from "react";
-import { Phone, Mail, MapPin } from "lucide-react";
+
+import Footer from "../../components/layout/Footer";
+import ContactSection from "../../components/home/ContactSection";
+import PageHeader from "../../components/common/PageHeader"; // <--- Import
 import TopBar from "../../components/layout/Topbar";
 import NavBar from "../../components/layout/Navbar";
 
 const Contact = () => {
   return (
-    <>
-      <TopBar />
-      <NavBar />
-      <div className="container mx-auto px-4 py-16">
-        {/* Navbar removed. Just the page content here. */}
-        <div className="grid md:grid-cols-2 gap-12 bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-          {/* ... rest of your code ... */}
-        </div>
-      </div>
-    </>
+    <div className="flex flex-col min-h-screen">
+    <TopBar />
+    <NavBar />
+
+      <main className="flex-grow bg-gray-50">
+        {/* Replaced old text header with new PageHeader */}
+        <PageHeader title="Contact Us" />
+
+        {/* Reuse the Contact Form Section */}
+        <ContactSection />
+      </main>
+
+      <Footer />
+    </div>
   );
 };
 
