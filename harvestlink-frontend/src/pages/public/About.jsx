@@ -1,88 +1,93 @@
 import React from "react";
 import { MapPin, ShieldCheck, Truck, Clock } from "lucide-react";
-
-import Footer from "../../components/layout/Footer";
-import PageHeader from "../../components/common/PageHeader"; // <--- Import
 import TopBar from "../../components/layout/Topbar";
 import NavBar from "../../components/layout/Navbar";
 
 const About = () => {
   return (
-    <div className="flex flex-col min-h-screen">
-     <TopBar />
-     <NavBar />
-      <main className="flex-grow">
-        <PageHeader title="About Us" />
+    <>
+      <TopBar />
+      <NavBar />
 
-        {/* Mission Section */}
-        <div className="container mx-auto px-4 py-8">
-          {/* ... (Keep your existing mission content here) ... */}
-          <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
-            <div>
-              <img
-                src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&q=80&w=800"
-                alt="Farmer in field"
-                className="rounded-2xl shadow-lg"
-              />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold text-harvest-dark mb-6">
-                Our Mission
-              </h2>
-              <p className="text-gray-600 mb-4 leading-relaxed">
-                We aim to eliminate inefficiencies in the supply chain by
-                allowing restaurants and grocers to discover fresh produce
-                within a specific radius.
-              </p>
-              <p className="text-gray-600 leading-relaxed">
-                HarvestLink ensures verified farmers get fair prices and
-                businesses get the freshest ingredients.
-              </p>
-            </div>
-          </div>
+      {/* Hero Section */}
+      <div className="bg-harvest-bg-light py-20">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-4xl font-bold text-harvest-dark mb-4">
+            Empowering Local Agriculture
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            HarvestLink is a direct Farm-to-Business directory designed to
+            bridge the gap between verified farmers and local businesses.
+          </p>
         </div>
+      </div>
 
-        {/* Features Grid (Re-added for context) */}
-        <div className="bg-gray-50 py-16">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-harvest-dark text-center mb-12">
-              Why Choose HarvestLink?
+      {/* Mission Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <img
+              src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&q=80&w=800"
+              alt="Farmer in field"
+              className="rounded-2xl shadow-lg"
+            />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-harvest-dark mb-6">
+              Our Mission
             </h2>
-            <div className="grid md:grid-cols-4 gap-8">
-              <FeatureCard
-                icon={<MapPin className="w-8 h-8 text-harvest-primary" />}
-                title="Geospatial Discovery"
-                desc="Find fresh harvest yields nearby."
-              />
-              <FeatureCard
-                icon={<ShieldCheck className="w-8 h-8 text-harvest-primary" />}
-                title="Escrow Payments"
-                desc="Secure transactions via admin trust anchor."
-              />
-              <FeatureCard
-                icon={<Truck className="w-8 h-8 text-harvest-primary" />}
-                title="Integrated Delivery"
-                desc="Automated logistics coordination."
-              />
-              <FeatureCard
-                icon={<Clock className="w-8 h-8 text-harvest-primary" />}
-                title="Real-time Alerts"
-                desc="Instant notifications for new crops."
-              />
-            </div>
+            <p className="text-gray-600 mb-4 leading-relaxed">
+              We aim to eliminate inefficiencies in the supply chain by allowing
+              restaurants and grocers to discover fresh produce within a
+              specific radius. By removing unnecessary middlemen, we ensure
+              farmers get better prices and businesses get fresher ingredients.
+            </p>
+            <p className="text-gray-600 leading-relaxed">
+              Our platform ensures trust through secure escrow payments and
+              automated logistics coordination.
+            </p>
           </div>
         </div>
-      </main>
+      </div>
 
-      <Footer />
-    </div>
+      {/* Features Grid */}
+      <div className="bg-white py-16 border-t border-gray-100">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-harvest-dark text-center mb-12">
+            Why Choose HarvestLink?
+          </h2>
+          <div className="grid md:grid-cols-4 gap-8">
+            <FeatureCard
+              icon={<MapPin className="w-8 h-8 text-harvest-primary" />}
+              title="Geospatial Discovery"
+              desc="Find fresh harvest yields within your local radius instantly."
+            />
+            <FeatureCard
+              icon={<ShieldCheck className="w-8 h-8 text-harvest-primary" />}
+              title="Escrow Payments"
+              desc="Your funds are held securely until the delivery is verified."
+            />
+            <FeatureCard
+              icon={<Truck className="w-8 h-8 text-harvest-primary" />}
+              title="Integrated Delivery"
+              desc="Automated logistics coordination between farmers and buyers."
+            />
+            <FeatureCard
+              icon={<Clock className="w-8 h-8 text-harvest-primary" />}
+              title="Real-time Alerts"
+              desc="Get notified immediately when your favorite crops are harvested."
+            />
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 
 // Helper Component
 const FeatureCard = ({ icon, title, desc }) => (
-  <div className="p-6 bg-white rounded-xl text-center shadow-sm hover:shadow-md transition">
-    <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+  <div className="p-6 bg-gray-50 rounded-xl text-center hover:shadow-md transition">
+    <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
       {icon}
     </div>
     <h3 className="text-xl font-bold text-harvest-text mb-2">{title}</h3>
