@@ -2,6 +2,8 @@ import React from "react";
 import { MapPin, ShieldCheck, Truck, Clock } from "lucide-react";
 import TopBar from "../../components/layout/Topbar";
 import NavBar from "../../components/layout/Navbar";
+import PageHeader from "../../components/layout/PageHeader";
+import AboutSection from "../../components/common/AboutSection";
 
 const About = () => {
   return (
@@ -9,46 +11,12 @@ const About = () => {
       <TopBar />
       <NavBar />
 
-      {/* Hero Section */}
-      <div className="bg-harvest-bg-light py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold text-harvest-dark mb-4">
-            Empowering Local Agriculture
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            HarvestLink is a direct Farm-to-Business directory designed to
-            bridge the gap between verified farmers and local businesses.
-          </p>
-        </div>
-      </div>
+      <PageHeader 
+        title="About Us"
+        bgImage="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&q=80&w=1600" 
+      />
 
-      {/* Mission Section */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <img
-              src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&q=80&w=800"
-              alt="Farmer in field"
-              className="rounded-2xl shadow-lg"
-            />
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold text-harvest-dark mb-6">
-              Our Mission
-            </h2>
-            <p className="text-gray-600 mb-4 leading-relaxed">
-              We aim to eliminate inefficiencies in the supply chain by allowing
-              restaurants and grocers to discover fresh produce within a
-              specific radius. By removing unnecessary middlemen, we ensure
-              farmers get better prices and businesses get fresher ingredients.
-            </p>
-            <p className="text-gray-600 leading-relaxed">
-              Our platform ensures trust through secure escrow payments and
-              automated logistics coordination.
-            </p>
-          </div>
-        </div>
-      </div>
+      <AboutSection />
 
       {/* Features Grid */}
       <div className="bg-white py-16 border-t border-gray-100">

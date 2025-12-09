@@ -39,35 +39,32 @@ const Features = () => {
       <div className="container mx-auto px-4 md:px-8">
        
         <div className="text-center mb-16 max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-harvest-dark mb-4">
+          <h2 className="text-3xl md:text-3xl font-bold text-harvest-dark mb-4 drop-shadow-sm">
             "Seamless Sourcing, Freshly Delivered."
           </h2>
-          <p className="text-gray-600 text-lg">
-            Here's How HarvestLink Brings Farm-Fresh Produce Directly To Your
-            Business, Simply And Securely.
+          <p className="text-gray-600 text-sm md:text-base font-medium">
+            Here's How HarvestLink Brings Farm-Fresh Produce <br className="hidden md:block"/> Directly To Your Business, Simply And Securely.
           </p>
         </div>
 
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {steps.map((step) => (
             <div
               key={step.id}
-              className="group bg-white border-2 border-harvest-dark rounded-2xl p-8 flex flex-col items-center text-center hover:shadow-xl hover:border-harvest-primary transition-all duration-300 transform hover:-translate-y-1"
+              className="group bg-white border-2 border-harvest-dark rounded-xl p-6 flex flex-col items-center text-center hover:shadow-xl hover:border-harvest-primary transition-all duration-300 transform hover:-translate-y-1 h-full"
             >
               
-              <div className="mb-6 p-4 bg-gray-50 rounded-full group-hover:bg-harvest-bg-light transition-colors">
+              <div className="mb-4">
                 {step.icon}
               </div>
 
               
-              <h3 className="text-xl font-bold text-harvest-dark leading-tight">
+              <h3 className="text-sm font-bold text-harvest-dark leading-tight">
                 {step.title} <br /> {step.subtitle}
               </h3>
 
-               <p className="text-sm text-gray-500 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                {step.desc}
-              </p>
+              {/* Description kept but hidden or small if needed, styling as per request for cards */}
             </div>
           ))}
         </div>

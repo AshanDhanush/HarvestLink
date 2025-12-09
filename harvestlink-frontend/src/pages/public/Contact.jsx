@@ -4,23 +4,19 @@ import TopBar from "../../components/layout/Topbar";
 import NavBar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import FAQSection from "../../components/contact/FAQSection";
+import PageHeader from "../../components/layout/PageHeader";
 
 const Contact = () => {
   return (
     <>
       <TopBar />
       <NavBar />
-      <div className="bg-gray-50 min-h-screen">
-        {/* Header Section */}
-        <div className="bg-harvest-dark text-white py-16 md:py-24 relative overflow-hidden">
-            <div className="absolute inset-0 bg-black/20"></div>
-            <div className="container mx-auto px-4 relative z-10 text-center">
-                <h1 className="text-4xl md:text-5xl font-bold mb-4">Get in Touch</h1>
-                <p className="text-lg text-gray-200 max-w-2xl mx-auto">
-                    Have questions about our produce or need support? We're here to help you grow.
-                </p>
-            </div>
-        </div>
+      <PageHeader 
+          title="Contact Us" 
+          bgImage="https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&q=80&w=1600" 
+      />
+      
+      <div className="bg-gray-50 pb-20">
 
         <div className="container mx-auto px-4 py-12 -mt-10 relative z-20">
           <div className="grid md:grid-cols-3 gap-6 mb-12">

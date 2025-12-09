@@ -8,6 +8,7 @@ import Register from "./pages/auth/Register";
 import FarmerDashboard from "./pages/farmer/FarmerDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import SearchMap from "./pages/buyer/SearchMap";
+import Shop from "./pages/buyer/Shop"; // Added Shop import
 
 import About from "./pages/public/About";
 import Contact from "./pages/public/Contact";
@@ -21,6 +22,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/shop" element={<Shop />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 

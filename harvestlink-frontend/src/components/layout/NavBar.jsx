@@ -56,7 +56,7 @@ const NavBar = () => {
             Home
           </Link>
           <Link
-            to="/search"
+            to="/shop"
             className="text-harvest-text font-medium hover:text-harvest-primary transition"
           >
             Shop
@@ -122,7 +122,7 @@ const NavBar = () => {
             <Link to="/" className="py-2 text-harvest-text font-medium">
               Home
             </Link>
-            <Link to="/search" className="py-2 text-harvest-text font-medium">
+            <Link to="/shop" className="py-2 text-harvest-text font-medium">
               Shop
             </Link>
             <Link to="/about" className="py-2 text-harvest-text font-medium">
