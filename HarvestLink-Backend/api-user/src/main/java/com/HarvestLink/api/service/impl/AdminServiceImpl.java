@@ -3,7 +3,9 @@ package com.HarvestLink.api.service.impl;
 import com.HarvestLink.api.model.dto.UserDto;
 import com.HarvestLink.api.repository.UserRepository;
 import com.HarvestLink.api.service.AdminService;
+import com.HarvestLink.api.util.Role;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,5 +30,10 @@ public class AdminServiceImpl implements AdminService {
                         .role(user.getRole())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserDto> getFarmers() {
+       return  userRepository.findByRole(Role.FARMER);
     }
 }

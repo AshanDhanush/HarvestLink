@@ -7,4 +7,6 @@ import com.HarvestLink.api.model.dto.UserDto;
 public interface AdminService {
 
     List<UserDto> getAllUsers();
+
+    List<UserDto> getFarmers();
 }

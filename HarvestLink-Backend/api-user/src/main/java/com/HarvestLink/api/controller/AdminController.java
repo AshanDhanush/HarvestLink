@@ -23,4 +23,11 @@ public class AdminController {
     public ResponseEntity<List<UserDto>> getAllUsers() {
         return ResponseEntity.ok(adminService.getAllUsers());
     }
+
+    @GetMapping("get/farmers")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<UserDto>> getFarmers(){
+        return ResponseEntity.ok(adminService.getFarmers());
+    }
+
 }
