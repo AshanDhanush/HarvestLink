@@ -1,5 +1,5 @@
 import React from "react";
-import { Star } from "lucide-react";
+import { Star, Heart } from "lucide-react";
 
 const ProductCard = ({ image, title, soldPercentage, price, unit }) => {
   return (
@@ -10,6 +10,9 @@ const ProductCard = ({ image, title, soldPercentage, price, unit }) => {
           alt={title} 
           className="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"
         />
+        <button className="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white text-gray-600 hover:text-red-500 shadow-sm transition-colors duration-300 backdrop-blur-sm">
+            <Heart size={20} />
+        </button>
       </div>
       
       <div className="p-6 text-center">
