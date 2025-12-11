@@ -4,10 +4,23 @@ server:
 spring:
   application:
     name: api-gateway
-
   cloud:
     gateway:
       routes:
+        - id: product-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/v1/products/**
+          filters:
+            - AddResponseHeader=X-Response-Time, "Gateway"
+
+        - id: notification-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/notification/**
+          filters:
+            - AddResponseHeader=X-Response-Time, "Gateway"
+
         - id: user-service
           uri: http://localhost:8080
           predicates:
@@ -15,16 +28,8 @@ spring:
           filters:
             - AddResponseHeader=X-Response-Time, "Gateway"
 
-        - id: notification-service
-          uri: http://localhost:8084
-          predicates:
-            - Path=/notification
-          filters:
-            - AddResponseHeader=X-Response-Time, "Gateway"
-
-        - id: product-service
-          uri: http://localhost:8081
-          predicates:
-            - Path=/api/v1/products
-          filters:
-            - AddResponseHeader=X-Response-Time, "Gateway"
+  # SECURITY CONFIGURATION
+  security:
+    jwt:
+      # FIX: Must match api-user exactly
+      secret-key: "c29tZXZlcnlzZWNyZXRrZXl0aGF0aXNsb25nZW5vdWdoZm9yMjU2Yml0c2FsZ29yaXRobQ=="

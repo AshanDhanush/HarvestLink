@@ -14,5 +14,6 @@ import com.HarvestLink.api.model.entity.User;
 public interface UserRepository extends MongoRepository<User, String> {
     Optional<User> findByEmail(String email);
 
-    List<UserDto> findByRole(Role role);
+    List<User> findByRole(Role role);
+
 }
