@@ -11,11 +11,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
-public class ApiApplication {
+public class UserApplication {
 	@Builder
 
 	public static void main(String[] args) {
-		SpringApplication.run(ApiApplication.class, args);
+		SpringApplication.run(UserApplication.class, args);
 	}
 
 	@Bean

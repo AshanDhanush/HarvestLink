@@ -1,14 +1,13 @@
-package com.HarvestLink.api;
+package uok.stu.Harvestlink;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ApiProductApplication {
+public class CartApplication {
 
 	public static void main(String[] args) {
-
-        SpringApplication.run(ApiProductApplication.class, args);
+		SpringApplication.run(CartApplication.class, args);
 	}
 
 }
