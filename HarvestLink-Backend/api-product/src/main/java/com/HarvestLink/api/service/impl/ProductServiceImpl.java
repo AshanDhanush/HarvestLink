@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final com.HarvestLink.api.service.ProductEventProducer productEventProducer;
 
     private ProductResponse mapToProductResponse(Product product){
 
@@ -47,6 +48,7 @@ public class ProductServiceImpl implements ProductService {
                 .build();
 
         Product savedProduct = productRepository.save(product);
+        productEventProducer.sendProductEvent(savedProduct);
         return mapToProductResponse(savedProduct);
 }
     @Override
