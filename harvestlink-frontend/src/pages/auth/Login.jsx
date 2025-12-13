@@ -1,10 +1,53 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
 import farmerBG from "../../assets/farmer-bg.png";
 import logo from "../../assets/Logo-D@0.75x.png";
+import authService from "../../services/authService";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    // Clear error when user types
+    if (error) setError("");
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await authService.login(formData);
+      const user = response.user;
+      
+      // Redirect based on role
+      if (user.role === "ADMIN") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
+      console.error("Login failed", err);
+      // Construct a user-friendly error message
+      const errorMessage = err.response?.data?.message || "Invalid email or password. Please try again.";
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row shadow-lime-900/20">
@@ -47,14 +90,25 @@ const Login = () => {
             </p>
           </div>
 
-          <form className="space-y-4">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-center gap-2">
+              <AlertCircle size={16} />
+              {error}
+            </div>
+          )}
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-gray-700 block">Email Address</label>
               <div className="relative group">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-harvest-primary transition" size={18} />
                 <input 
                   type="email" 
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   placeholder="name@example.com" 
+                  required
                   className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-gray-200 focus:border-harvest-primary focus:ring-2 focus:ring-harvest-primary/20 outline-none transition bg-gray-50 focus:bg-white text-sm"
                 />
               </div>
@@ -71,7 +125,11 @@ const Login = () => {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-harvest-primary transition" size={18} />
                 <input 
                   type="password" 
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
                   placeholder="••••••••" 
+                  required
                   className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-gray-200 focus:border-harvest-primary focus:ring-2 focus:ring-harvest-primary/20 outline-none transition bg-gray-50 focus:bg-white text-sm"
                 />
               </div>
@@ -79,9 +137,14 @@ const Login = () => {
 
             <button 
               type="submit" 
-              className="w-full bg-harvest-primary hover:bg-harvest-primary-hover text-white font-bold py-2.5 rounded-lg shadow-md shadow-harvest-primary/20 transition transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 text-sm"
+              disabled={loading}
+              className={`w-full bg-harvest-primary hover:bg-harvest-primary-hover text-white font-bold py-2.5 rounded-lg shadow-md shadow-harvest-primary/20 transition transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 text-sm ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              Sign In <ArrowRight size={18} />
+              {loading ? 'Signing in...' : (
+                <>
+                  Sign In <ArrowRight size={18} />
+                </>
+              )}
             </button>
             
             <div className="relative my-5">
