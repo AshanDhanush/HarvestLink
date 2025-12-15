@@ -12,7 +12,8 @@ import Shop from "./pages/buyer/Shop";
 
 import About from "./pages/public/About";
 import Contact from "./pages/public/Contact";
-
+import DeliveryCharges from './pages/public/DeliveryCharges';
+import DeliveryProductsTest from './pages/public/DeliveryProductsTest';
 function App() {
   return (
     <BrowserRouter>
@@ -25,7 +26,8 @@ function App() {
         <Route path="/shop" element={<Shop />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
+        <Route path="/delivery-test" element={<DeliveryProductsTest />} />
+        <Route path="/delivery-charges/:id" element={<DeliveryCharges />} />
         {/* Buyer Routes */}
         <Route path="/search" element={<SearchMap />} />
 
