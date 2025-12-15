@@ -14,6 +14,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -37,7 +40,13 @@ public class AuthServiceImpl implements AuthService {
 
         User savedUser = userRepository.save(user);
 
-        var jwtToken = jwtService.generateToken(user);
+        // FIX: Add role to claims so Gateway can read it
+        Map<String, Object> extraClaims = new HashMap<>();
+        if (savedUser.getRole() != null) {
+            extraClaims.put("role", savedUser.getRole().name());
+        }
+
+        var jwtToken = jwtService.generateToken(extraClaims, user);
 
         var userDto = UserDto.builder()
                 .id(savedUser.getId())
@@ -58,16 +67,22 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                request.getEmail(),
-                request.getPassword()
-            )
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
         );
 
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + request.getEmail()));
 
-        var jwtToken = jwtService.generateToken(user);
+        // FIX: Add role to claims so Gateway can read it
+        Map<String, Object> extraClaims = new HashMap<>();
+        if (user.getRole() != null) {
+            extraClaims.put("role", user.getRole().name());
+        }
+
+        var jwtToken = jwtService.generateToken(extraClaims, user);
 
         var userDto = UserDto.builder()
                 .id(user.getId())
