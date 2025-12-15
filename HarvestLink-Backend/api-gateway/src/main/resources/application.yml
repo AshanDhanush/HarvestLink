@@ -28,8 +28,7 @@ spring:
           filters:
             - AddResponseHeader=X-Response-Time, "Gateway"
 
-  # SECURITY CONFIGURATION
+
   security:
     jwt:
-      # FIX: Must match api-user exactly
       secret-key: "c29tZXZlcnlzZWNyZXRrZXl0aGF0aXNsb25nZW5vdWdoZm9yMjU2Yml0c2FsZ29yaXRobQ=="
