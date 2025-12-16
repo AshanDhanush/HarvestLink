@@ -1,4 +1,4 @@
-package com.HarvestLink.api.product;
+package com.HarvestLink.api_product;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

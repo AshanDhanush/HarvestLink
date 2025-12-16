@@ -1,4 +1,4 @@
-package com.HarvestLink.api.product;
+package com.HarvestLink.api_product;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
