@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
+import { Mail, Lock, ArrowRight, AlertCircle, User } from "lucide-react";
 import farmerBG from "../../assets/farmer-bg.png";
 import logo from "../../assets/Logo-D@0.75x.png";
 import authService from "../../services/authService";
@@ -40,6 +40,7 @@ const Login = () => {
       }
     } catch (err) {
       console.error("Login failed", err);
+      console.log(User);
       // Construct a user-friendly error message
       const errorMessage = err.response?.data?.message || "Invalid email or password. Please try again.";
       setError(errorMessage);

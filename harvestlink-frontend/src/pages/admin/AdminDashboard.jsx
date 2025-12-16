@@ -448,7 +448,7 @@ const FarmersCRUDSection = ({ farmers, onAddClick, onEditClick, onDeleteClick })
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className={`h-8 w-8 rounded-full bg-[${colors.primaryLime}] bg-opacity-20 flex items-center justify-center text-[${colors.primaryDark}] font-bold`}>
-                          {farmer.name.charAt(0)}
+                          {farmer.firstName}
                         </div>
                         <span className="text-gray-800 font-bold">{farmer.name}</span>
                       </div>

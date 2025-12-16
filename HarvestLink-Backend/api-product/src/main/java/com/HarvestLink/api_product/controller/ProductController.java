@@ -10,42 +10,42 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/product")
 @RequiredArgsConstructor
 public class ProductController {
 
     private final ProductService productService;
 
     // CREATE - HTTP POST
-    @PostMapping
+    @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
     public void createProduct(@RequestBody ProductRequest productRequest) {
         productService.createProduct(productRequest);
     }
 
     // READ All - HTTP GET
-    @GetMapping
+    @GetMapping("getAll")
     @ResponseStatus(HttpStatus.OK)
     public List<ProductResponse> getAllProducts() {
         return productService.getAllProducts();
     }
 
     // READ by ID - HTTP GET
-    @GetMapping("/{id}")
+    @GetMapping("/getby/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ProductResponse getProductById(@PathVariable String id) {
         return productService.getProductById(id);
     }
 
     // UPDATE - HTTP PUT
-    @PutMapping("/{id}")
+    @PutMapping("/update/by/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateProduct(@PathVariable String id, @RequestBody ProductRequest productRequest) {
         productService.updateProduct(id, productRequest);
     }
 
     // DELETE - HTTP DELETE
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProduct(@PathVariable String id) {
         productService.deleteProduct(id);
