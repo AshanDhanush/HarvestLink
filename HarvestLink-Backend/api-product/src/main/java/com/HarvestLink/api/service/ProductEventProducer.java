@@ -1,6 +1,6 @@
 package com.HarvestLink.api.service;
 
-import com.HarvestLink.api.model.entity.Product;
+import com.HarvestLink.api.model.dto.ProductEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -13,7 +13,7 @@ public class ProductEventProducer {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void sendProductEvent(Product product) {
+    public void sendProductEvent(ProductEvent product) {
         log.info("Sending product event for product: {}", product.getId());
         kafkaTemplate.send("product-events", product);
     }
