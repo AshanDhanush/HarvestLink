@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/api/v1/auth/**", "/actuator/**").permitAll()
+                        .pathMatchers("/notification").permitAll()
                         .pathMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
