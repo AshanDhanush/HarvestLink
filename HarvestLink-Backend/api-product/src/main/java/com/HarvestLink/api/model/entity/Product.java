@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "products")//MongoDB collection Name
+
 public class Product {
     @Id
     private String id;
