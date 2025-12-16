@@ -102,8 +102,10 @@ const recentOrders = [
   },
 ];
 
-// --- MOCK DATA (Farmers CRUD Backend Simulation) ---
+
 const initialFarmersData = [];
+// --- MOCK DATA (Businesses CRUD Backend Simulation) ---
+const initialBusinessesData = [];
 
 // === Components ===
 
@@ -120,7 +122,7 @@ const Sidebar = ({ currentView, setCurrentView }) => {
 
   return (
     <aside className={`w-64 bg-white text-green-800 flex flex-col h-screen fixed left-0 top-0 z-20 transition-all duration-300 font-sans`}>
-      {/* Logo Area - Replaced Image with Text/Icon placeholder */}
+     
       <div className="h-16 flex items-center px-6 font-bold text-xl border-b border-[#ffffff20]">
         <img
           src={logo}
@@ -136,11 +138,16 @@ const Sidebar = ({ currentView, setCurrentView }) => {
           <button
             key={item.id}
             onClick={() => setCurrentView(item.id)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 group font-sans text-left ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg duration-200 group font-sans text-left ${
               currentView === item.id
-                ? `bg-[${colors.primaryLime}] text-[${colors.primaryDark}] font-bold`
-                : `hover:bg-green-400 text-gray-300 hover:text-green-700 font-medium`
+                ? 'font-bold'
+                : 'hover:bg-green-400 text-gray-700 hover:text-green-700 font-medium'
             }`}
+            style={
+              currentView === item.id
+                ? { backgroundColor: colors.primaryLime, color: colors.primaryDark }
+                : undefined
+            }
           >
             {item.icon}
             <span>{item.label}</span>
@@ -150,7 +157,10 @@ const Sidebar = ({ currentView, setCurrentView }) => {
 
       {/* Logout Button */}
       <div className="p-4 border-t border-[#ffffff20]">
-        <button className="flex items-center gap-3 px-4 py-3 rounded-lg w-full hover:bg-green-400 text-gray-300 hover:text-green-700 transition-colors font-medium">
+        <button
+          className="flex items-center gap-3 px-4 py-3 rounded-lg w-full hover:bg-green-400 hover:text-green-700 transition-colors font-medium"
+          style={{ color: colors.primaryDark }}
+        >
           <LogOut size={20} />
           <span>Logout</span>
         </button>
@@ -159,7 +169,7 @@ const Sidebar = ({ currentView, setCurrentView }) => {
   );
 };
 
-// 2. Header Component
+
 const Header = () => (
   <header className="h-16 bg-white shadow-sm fixed top-0 right-0 left-64 z-10 flex items-center justify-between px-6 transition-all duration-300 font-sans">
     <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 w-96">
@@ -173,7 +183,7 @@ const Header = () => (
 
     <div className="flex items-center gap-6">
       <div className="relative cursor-pointer">
-        <Bell size={20} className={`text-gray-600 hover:text-[${colors.primaryDark}] transition`} />
+          <Bell size={20} className="text-gray-600 hover:text-emerald-800 transition" />
         <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
       </div>
 
@@ -181,15 +191,15 @@ const Header = () => (
         <img
           src="https://i.pravatar.cc/150?img=68"
           alt="Admin Profile"
-          className={`h-9 w-9 rounded-full border-2 border-gray-200 group-hover:border-[${colors.primaryLime}] transition`}
+           className={`h-9 w-9 rounded-full border-2 border-gray-200 group-hover:border-lime-400 transition`}
         />
         <div className="hidden md:block text-sm text-left font-sans">
-          <p className={`font-bold text-gray-700 group-hover:text-[${colors.primaryDark}]`}>
+          <p className="font-bold text-gray-700 group-hover:text-emerald-800">
             Admin User
           </p>
           <p className="text-gray-400 text-xs font-medium">Super Admin</p>
         </div>
-        <ChevronDown size={16} className={`text-gray-400 group-hover:text-[${colors.primaryDark}]`} />
+        <ChevronDown size={16} className="text-gray-400 group-hover:text-emerald-800" />
       </div>
     </div>
   </header>
@@ -203,7 +213,7 @@ const StatsCard = ({ item }) => (
         <p className="text-sm font-medium text-gray-500 mb-1">{item.title}</p>
         <h3 className="text-2xl font-bold text-gray-800">{item.value}</h3>
       </div>
-      <div className={`p-3 rounded-lg bg-[${colors.primaryDark}] bg-opacity-10 text-[${colors.primaryDark}]`}>
+      <div className={`p-3 rounded-lg bg-lime-100`} style={{ color: colors.primaryDark }}>
         {item.icon}
       </div>
     </div>
@@ -229,7 +239,7 @@ const RecentOrdersTable = () => {
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden font-sans">
       <div className="p-6 border-b border-gray-100 flex justify-between items-center">
         <h2 className="text-lg font-bold text-gray-800">Recent Orders</h2>
-        <button className={`text-sm text-[${colors.primaryDark}] font-bold hover:underline`}>
+        <button className={`text-sm text-emerald-800 font-bold hover:underline`}>
           View All
         </button>
       </div>
@@ -274,7 +284,7 @@ const TopProductsWidget = () => (
         <div key={i} className="flex items-center justify-between border-b border-gray-50 pb-3 last:border-0 last:pb-0">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
-              <Leaf size={18} className={`text-[${colors.primaryDark}]`} />
+              <Leaf size={18} className={`text-emerald-800`} />
             </div>
             <div>
               <p className="font-bold text-gray-800 text-sm">{product.name}</p>
@@ -296,12 +306,158 @@ const TopProductsWidget = () => (
 const FarmerModal = ({ isOpen, onClose, onSave, editingFarmer }) => {
   const [formData, setFormData] = useState(
     editingFarmer || {
+      firstName: "",
+      lastName: "",
+      email: "",
+      contactNo: "",
+      address: "",
+      role: "Farmer",
+    }
+  );
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.firstName || (!formData.email && !formData.contactNo)) {
+      alert("First name and either email or contact number are required!");
+      return;
+    }
+    const payload = { ...formData };
+    // ensure role is fixed to Farmer and remove any status field
+    payload.role = 'Farmer';
+    if (payload.status) delete payload.status;
+    onSave(payload);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 backdrop-blur-xs bg-opacity-50 z-50 flex justify-center items-center font-sans">
+      <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 overflow-hidden">
+        <div className="flex justify-between items-center p-6 border-b border-gray-100" style={{ backgroundColor: colors.bgLight }}>
+          <h3 className="text-lg font-bold text-gray-800">{editingFarmer ? "Edit Farmer" : "Add New Farmer"}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
+            <X size={24} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">First Name</label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                placeholder="e.g., Sunil"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Last Name</label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                placeholder="e.g., Perera"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                placeholder="example@domain.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Contact Number</label>
+              <div className="relative">
+                <Phone size={18} className="absolute left-3 top-3.5 text-gray-400" />
+                <input
+                  type="text"
+                  name="contactNo"
+                  value={formData.contactNo}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                  placeholder="07X-XXXXXXX"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">Address</label>
+            <div className="relative">
+              <MapPin size={18} className="absolute left-3 top-3.5 text-gray-400" />
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                placeholder="e.g., Dambulla"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Role</label>
+              <input
+                type="text"
+                name="role"
+                value={formData.role || 'Farmer'}
+                readOnly
+                className="w-full px-4 py-3 rounded-lg bg-gray-100 border border-gray-200 text-gray-700 cursor-not-allowed font-medium"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+            <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 font-bold transition">
+              Cancel
+            </button>
+            <button type="submit" className={`px-6 py-2 rounded-lg text-white hover:bg-opacity-90 font-bold transition flex items-center gap-2`} style={{ backgroundColor: colors.primaryDark }}>
+              {editingFarmer ? <Edit size={18} /> : <Plus size={18} />}
+              {editingFarmer ? "Update Farmer" : "Save Farmer"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// 6b. Business Modal
+const BusinessModal = ({ isOpen, onClose, onSave, editingBusiness }) => {
+  const [formData, setFormData] = useState(
+    editingBusiness || {
       name: "",
       location: "",
       contact: "",
+      businessType: "Retail",
       status: "Active",
     }
   );
+
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      setFormData(editingBusiness || { name: "", location: "", contact: "", businessType: "Retail", status: "Active" });
+    });
+  }, [editingBusiness]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -321,8 +477,8 @@ const FarmerModal = ({ isOpen, onClose, onSave, editingFarmer }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center font-sans">
       <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 overflow-hidden">
-        <div className={`flex justify-between items-center p-6 border-b border-gray-100 bg-[${colors.bgLight}]`}>
-          <h3 className="text-lg font-bold text-gray-800">{editingFarmer ? "Edit Farmer" : "Add New Farmer"}</h3>
+        <div className="flex justify-between items-center p-6 border-b border-gray-100" style={{ backgroundColor: colors.bgLight }}>
+          <h3 className="text-lg font-bold text-gray-800">{editingBusiness ? "Edit Business" : "Add New Business"}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
             <X size={24} />
           </button>
@@ -330,14 +486,14 @@ const FarmerModal = ({ isOpen, onClose, onSave, editingFarmer }) => {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">Full Name</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">Business Name</label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-[${colors.primaryLime}] focus:bg-white focus:ring-0 transition font-medium"
-              placeholder="e.g., Sunil Perera"
+              className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+              placeholder="e.g., Colombo Fresh Market"
             />
           </div>
 
@@ -351,8 +507,8 @@ const FarmerModal = ({ isOpen, onClose, onSave, editingFarmer }) => {
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-[${colors.primaryLime}] focus:bg-white focus:ring-0 transition font-medium"
-                  placeholder="e.g., Dambulla"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                  placeholder="e.g., Colombo"
                 />
               </div>
             </div>
@@ -365,11 +521,25 @@ const FarmerModal = ({ isOpen, onClose, onSave, editingFarmer }) => {
                   name="contact"
                   value={formData.contact}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-[${colors.primaryLime}] focus:bg-white focus:ring-0 transition font-medium"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
                   placeholder="07X-XXXXXXX"
                 />
               </div>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">Business Type</label>
+            <select
+              name="businessType"
+              value={formData.businessType}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+            >
+              <option value="Retail">Retail</option>
+              <option value="Restaurant">Restaurant</option>
+              <option value="Distributor">Distributor</option>
+            </select>
           </div>
 
           <div>
@@ -378,7 +548,7 @@ const FarmerModal = ({ isOpen, onClose, onSave, editingFarmer }) => {
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-[${colors.primaryLime}] focus:bg-white focus:ring-0 transition font-medium"
+              className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
             >
               <option value="Active">Active</option>
               <option value="Pending">Pending</option>
@@ -390,9 +560,9 @@ const FarmerModal = ({ isOpen, onClose, onSave, editingFarmer }) => {
             <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 font-bold transition">
               Cancel
             </button>
-            <button type="submit" className={`px-6 py-2 rounded-lg text-white bg-[${colors.primaryDark}] hover:bg-opacity-90 font-bold transition flex items-center gap-2`}>
-              {editingFarmer ? <Edit size={18} /> : <Plus size={18} />}
-              {editingFarmer ? "Update Farmer" : "Save Farmer"}
+            <button type="submit" className={`px-6 py-2 rounded-lg text-white hover:bg-opacity-90 font-bold transition flex items-center gap-2`} style={{ backgroundColor: colors.primaryDark }}>
+              {editingBusiness ? <Edit size={18} /> : <Plus size={18} />}
+              {editingBusiness ? "Update Business" : "Save Business"}
             </button>
           </div>
         </form>
@@ -421,7 +591,7 @@ const FarmersCRUDSection = ({ farmers, onAddClick, onEditClick, onDeleteClick })
           <h1 className="text-2xl font-bold text-gray-800">Farmers Management</h1>
           <p className="text-gray-500 text-sm font-medium">Manage your farmer network, add new profiles, or update existing ones.</p>
         </div>
-        <button onClick={onAddClick} className={`flex items-center gap-2 bg-[${colors.primaryDark}] text-white px-5 py-3 rounded-lg hover:bg-opacity-90 transition font-bold shadow-sm`}>
+        <button onClick={onAddClick} className={`flex items-center gap-2 text-white px-5 py-3 rounded-lg hover:bg-opacity-90 transition font-bold shadow-sm`} style={{ backgroundColor: colors.primaryDark }}>
           <Plus size={20} />
           <span>Add New Farmer</span>
         </button>
@@ -433,10 +603,11 @@ const FarmersCRUDSection = ({ farmers, onAddClick, onEditClick, onDeleteClick })
             <thead className="bg-gray-50 text-gray-500 text-sm uppercase tracking-wider">
               <tr>
                 <th className="px-6 py-4 font-bold">ID</th>
-                <th className="px-6 py-4 font-bold">Farmer Name</th>
-                <th className="px-6 py-4 font-bold">Location</th>
+                <th className="px-6 py-4 font-bold">Name</th>
+                <th className="px-6 py-4 font-bold">Email</th>
                 <th className="px-6 py-4 font-bold">Contact</th>
-                <th className="px-6 py-4 font-bold">Status</th>
+                <th className="px-6 py-4 font-bold">Address</th>
+                <th className="px-6 py-4 font-bold">Role</th>
                 <th className="px-6 py-4 font-bold text-right">Actions</th>
               </tr>
             </thead>
@@ -447,24 +618,21 @@ const FarmersCRUDSection = ({ farmers, onAddClick, onEditClick, onDeleteClick })
                     <td className="px-6 py-4 text-gray-600">#{farmer.id}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className={`h-8 w-8 rounded-full bg-[${colors.primaryLime}] bg-opacity-20 flex items-center justify-center text-[${colors.primaryDark}] font-bold`}>
-                          {farmer.firstName}
+                        <div className={`h-8 w-8 rounded-full bg-lime-200 flex items-center justify-center font-bold`} style={{ color: colors.primaryDark }}>
+                          {farmer.firstName ? farmer.firstName.charAt(0) : 'F'}
                         </div>
-                        <span className="text-gray-800 font-bold">{farmer.name}</span>
+                        <span className="text-gray-800 font-bold">{`${farmer.firstName || ''} ${farmer.lastName || ''}`.trim()}</span>
                       </div>
                     </td>
+                    <td className="px-6 py-4 text-gray-600">{farmer.email || '-'}</td>
+                    <td className="px-6 py-4 text-gray-600">{farmer.contactNo || '-'}</td>
                     <td className="px-6 py-4 text-gray-600">
                       <div className="flex items-center gap-2">
                         <MapPin size={14} className="text-gray-400" />
-                        {farmer.location}
+                        {farmer.address || '-'}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">{farmer.contact}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(farmer.status)}`}>
-                        {farmer.status}
-                      </span>
-                    </td>
+                    <td className="px-6 py-4 text-gray-600">{farmer.role || 'Farmer'}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
                         <button onClick={() => onEditClick(farmer)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
@@ -479,8 +647,81 @@ const FarmersCRUDSection = ({ farmers, onAddClick, onEditClick, onDeleteClick })
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500 font-medium">
+                  <td colSpan="7" className="px-6 py-8 text-center text-gray-500 font-medium">
                     No farmers found. Click "Add New Farmer" to start.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 8. Businesses CRUD Section
+const BusinessesCRUDSection = ({ businesses, onAddClick, onEditClick, onDeleteClick }) => {
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Active": return "bg-green-100 text-green-700";
+      case "Pending": return "bg-yellow-100 text-yellow-700";
+      case "Inactive": return "bg-red-100 text-red-700";
+      default: return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  return (
+    <div className="space-y-6 font-sans">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Businesses Management</h1>
+          <p className="text-gray-500 text-sm font-medium">Manage registered businesses and partners.</p>
+        </div>
+        <button onClick={onAddClick} className={`flex items-center gap-2 text-white px-5 py-3 rounded-lg hover:bg-opacity-90 transition font-bold shadow-sm`} style={{ backgroundColor: colors.primaryDark }}>
+          <Plus size={20} />
+          <span>Add New Business</span>
+        </button>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-gray-50 text-gray-500 text-sm uppercase tracking-wider">
+              <tr>
+                <th className="px-6 py-4 font-bold">ID</th>
+                <th className="px-6 py-4 font-bold">Business Name</th>
+                <th className="px-6 py-4 font-bold">Location</th>
+                <th className="px-6 py-4 font-bold">Contact</th>
+                <th className="px-6 py-4 font-bold">Type</th>
+                <th className="px-6 py-4 font-bold text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 text-sm">
+              {businesses.length > 0 ? (
+                businesses.map((b) => (
+                  <tr key={b.id} className="hover:bg-gray-50 transition font-medium">
+                    <td className="px-6 py-4 text-gray-600">#{b.id}</td>
+                    <td className="px-6 py-4 text-gray-800 font-bold">{b.name}</td>
+                    <td className="px-6 py-4 text-gray-600">{b.location}</td>
+                    <td className="px-6 py-4 text-gray-600">{b.contact}</td>
+                    <td className="px-6 py-4 text-gray-600">{b.businessType}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => onEditClick(b)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
+                          <Edit size={18} />
+                        </button>
+                        <button onClick={() => onDeleteClick(b.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500 font-medium">
+                    No businesses found. Click "Add New Business" to start.
                   </td>
                 </tr>
               )}
@@ -502,6 +743,12 @@ export default function AdminDashboard() {
   const [farmersError, setFarmersError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFarmer, setEditingFarmer] = useState(null);
+  // Businesses state
+  const [businesses, setBusinesses] = useState(initialBusinessesData);
+  const [loadingBusinesses, setLoadingBusinesses] = useState(false);
+  const [businessesError, setBusinessesError] = useState(null);
+  const [isBusinessModalOpen, setIsBusinessModalOpen] = useState(false);
+  const [editingBusiness, setEditingBusiness] = useState(null);
 
   // Fetch farmers from backend on mount
   useEffect(() => {
@@ -540,10 +787,51 @@ export default function AdminDashboard() {
     return () => { mounted = false; };
   }, []);
 
+  // Fetch businesses from backend on mount
+  useEffect(() => {
+    const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8085';
+    let mounted = true;
+
+    (async () => {
+      await Promise.resolve();
+      if (!mounted) return;
+      setLoadingBusinesses(true);
+      setBusinessesError(null);
+
+      try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const res = await fetch(`${API_BASE}/api/v1/admin/get/businesses`, {
+          method: 'GET',
+          headers,
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (mounted) setBusinesses(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch businesses:', err);
+        if (mounted) setBusinessesError(err.message || 'Failed to load businesses');
+      } finally {
+        if (mounted) setLoadingBusinesses(false);
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, []);
+
   // === CRUD Handlers ===
   const handleDeleteClick = (id) => {
     if (window.confirm("Are you sure you want to delete this farmer?")) {
       setFarmers(farmers.filter((farmer) => farmer.id !== id));
+    }
+  };
+
+  const handleBusinessDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this business?")) {
+      setBusinesses(businesses.filter((b) => b.id !== id));
     }
   };
 
@@ -552,9 +840,19 @@ export default function AdminDashboard() {
     setIsModalOpen(true);
   };
 
+  const handleAddBusinessClick = () => {
+    setEditingBusiness(null);
+    setIsBusinessModalOpen(true);
+  };
+
   const handleEditClick = (farmer) => {
     setEditingFarmer(farmer);
     setIsModalOpen(true);
+  };
+
+  const handleEditBusinessClick = (business) => {
+    setEditingBusiness(business);
+    setIsBusinessModalOpen(true);
   };
 
   const handleSaveFarmer = (farmerData) => {
@@ -577,8 +875,28 @@ export default function AdminDashboard() {
     setEditingFarmer(null);
   };
 
+  const handleSaveBusiness = (businessData) => {
+    if (editingBusiness) {
+      setBusinesses(
+        businesses.map((b) =>
+          b.id === editingBusiness.id ? { ...b, ...businessData } : b
+        )
+      );
+    } else {
+      const newId = businesses.length > 0 ? Math.max(...businesses.map(b => b.id)) + 1 : 1;
+      const newBusiness = {
+        id: newId,
+        ...businessData,
+        joinDate: new Date().toISOString().split('T')[0]
+      };
+      setBusinesses([...businesses, newBusiness]);
+    }
+    setIsBusinessModalOpen(false);
+    setEditingBusiness(null);
+  };
+
   return (
-    <div className={`flex h-screen bg-[${colors.bgLight}] font-sans`}>
+    <div className="flex h-screen font-sans" style={{ backgroundColor: colors.bgLight }}>
       <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
 
       <div className="flex-1 flex flex-col ml-64 transition-all duration-300">
@@ -611,8 +929,8 @@ export default function AdminDashboard() {
                   <TopProductsWidget />
 
                   {/* Promo/Help Card */}
-                  <div className={`bg-[${colors.primaryDark}] rounded-xl p-6 text-white relative overflow-hidden`}>
-                    <div className={`absolute -top-10 -right-10 w-32 h-32 bg-[${colors.primaryLime}] rounded-full opacity-20`}></div>
+                  <div className="rounded-xl p-6 text-white relative overflow-hidden" style={{ backgroundColor: colors.primaryDark }}>
+                    <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full" style={{ backgroundColor: colors.primaryLime, opacity: 0.2 }}></div>
                     <h3 className="font-bold text-lg mb-2 relative z-10">HarvestLink Admin</h3>
                     <p className="text-sm text-gray-300 relative z-10">Manage your agriculture network efficiently.</p>
                   </div>
@@ -638,6 +956,24 @@ export default function AdminDashboard() {
               )}
             </>
           )}
+
+          {/* === VIEW: BUSINESSES CRUD === */}
+          {currentView === "businesses" && (
+            <>
+              {loadingBusinesses ? (
+                <div className="p-6 bg-white rounded-xl shadow-sm text-center">Loading businesses...</div>
+              ) : businessesError ? (
+                <div className="p-6 bg-white rounded-xl shadow-sm text-center text-red-600">Error loading businesses: {businessesError}</div>
+              ) : (
+                <BusinessesCRUDSection
+                  businesses={businesses}
+                  onAddClick={handleAddBusinessClick}
+                  onEditClick={handleEditBusinessClick}
+                  onDeleteClick={handleBusinessDelete}
+                />
+              )}
+            </>
+          )}
         </main>
       </div>
 
@@ -648,6 +984,14 @@ export default function AdminDashboard() {
           onClose={() => setIsModalOpen(false)}
           onSave={handleSaveFarmer}
           editingFarmer={editingFarmer}
+        />
+      )}
+      {isBusinessModalOpen && (
+        <BusinessModal
+          isOpen={isBusinessModalOpen}
+          onClose={() => setIsBusinessModalOpen(false)}
+          onSave={handleSaveBusiness}
+          editingBusiness={editingBusiness}
         />
       )}
     </div>
