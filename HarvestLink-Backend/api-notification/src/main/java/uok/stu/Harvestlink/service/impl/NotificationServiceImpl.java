@@ -38,14 +38,13 @@ public class NotificationServiceImpl implements NotificationService {
 
         String finalIdempotencyKey = req.getIdempotencyKey();
 
-        // CHANGED: If key is missing, generate a RANDOM UNIQUE key (UUID)
-        // This prevents "Duplicate notification detected" errors for identical requests
+
         if (finalIdempotencyKey == null || !IdempotencyUtil.isValidKey(finalIdempotencyKey)) {
             finalIdempotencyKey = UUID.randomUUID().toString();
             log.info("🔑 Auto-generated unique key: {}", finalIdempotencyKey);
         }
 
-        // Check for duplicates (This checks if the *UUID* specifically exists, which is unlikely now)
+
         if (finalIdempotencyKey != null) {
             var existing = repo.findByIdempotencyKey(finalIdempotencyKey);
             if (existing.isPresent()) {
@@ -74,7 +73,7 @@ public class NotificationServiceImpl implements NotificationService {
         Notification saved = repo.save(notif);
         log.info("✅ Notification saved with ID: {}", saved.getId());
 
-        // Send Logic (Direct fallback if RabbitMQ is disabled)
+
         if ("email".equalsIgnoreCase(saved.getChannel())) {
             if (sender != null) {
                 log.info("📤 Publishing notification to RabbitMQ queue...");
@@ -91,11 +90,11 @@ public class NotificationServiceImpl implements NotificationService {
         return new CreateNotificationResponce(saved.getId(), saved.getStatus());
     }
 
-    // Inside NotificationServiceImpl.java
+
 
     private void sendEmailDirectly(Notification notification) {
         try {
-            // Check if attachment exists in the saved notification
+
             boolean hasAttachment = notification.getAttachmentData() != null
                     && notification.getAttachmentData().length > 0
                     && notification.getAttachmentName() != null;
@@ -103,7 +102,7 @@ public class NotificationServiceImpl implements NotificationService {
             if (hasAttachment) {
                 log.info("Directly sending email with attachment: {}", notification.getAttachmentName());
 
-                // Call the method in SmtpEmailServiceImpl
+
                 emailService.sendEmailWithAttachment(
                         notification.getToUser(),
                         notification.getSubject(),

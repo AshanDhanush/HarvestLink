@@ -17,6 +17,6 @@ public class ProductEventConsumer {
         log.info("Name: {}", productEvent.getName());
         log.info("Farmer ID: {}", productEvent.getFarmerId());
         log.info("========================================");
-        // Add logic to send notification (email/SMS) here if needed
+
     }
 }

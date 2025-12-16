@@ -26,7 +26,7 @@ public class NotificationConsumer {
         log.info("========================================");
 
         try {
-            // Check if notification has attachment
+
             boolean hasAttachment = notification.getAttachmentData() != null
                     && notification.getAttachmentData().length > 0
                     && notification.getAttachmentName() != null;
