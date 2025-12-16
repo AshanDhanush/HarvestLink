@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="Notification-service" />
+        <module name="api-product" />
         <module name="api-gateway1" />
       </profile>
       <profile name="Annotation profile for api" enabled="true">
@@ -17,10 +18,9 @@
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
         </processorPath>
-        <module name="Harvestlink" />
         <module name="api" />
       </profile>
-      <profile name="Annotation profile for api-product" enabled="true">
+      <profile name="Annotation profile for Harvestlink" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -28,7 +28,7 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
         </processorPath>
-        <module name="api-product" />
+        <module name="Harvestlink" />
       </profile>
     </annotationProcessing>
   </component>
@@ -38,7 +38,7 @@
       <module name="Notification-service" options="-parameters" />
       <module name="api" options="-parameters" />
       <module name="api-gateway1" options="-parameters" />
-      <module name="api-product" options="-parameters" />
+      <module name="api-product" options="" />
     </option>
   </component>
 </project>
