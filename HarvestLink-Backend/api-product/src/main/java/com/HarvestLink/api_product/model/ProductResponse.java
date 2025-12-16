@@ -1,4 +1,4 @@
-package com.HarvestLink.api_product.model.dto;
+package com.HarvestLink.api_product.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,7 +1,7 @@
 package com.HarvestLink.api_product.service;
 
 import com.HarvestLink.api_product.model.ProductRequest;
-import com.HarvestLink.api_product.model.dto.ProductResponse;
+import com.HarvestLink.api_product.model.ProductResponse;
 
 import java.util.List;
 
