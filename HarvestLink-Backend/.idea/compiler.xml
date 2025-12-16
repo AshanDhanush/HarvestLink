@@ -3,33 +3,6 @@
   <component name="CompilerConfiguration">
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
-      <profile name="Maven default annotation processors profile" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <module name="Notification-service" />
-        <module name="api-gateway1" />
-      </profile>
-      <profile name="Annotation profile for api-product" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
-        </processorPath>
-        <module name="api-product" />
-        <module name="Harvestlink" />
-        <module name="api" />
-      </profile>
     </annotationProcessing>
-  </component>
-  <component name="JavacSettings">
-    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="Harvestlink" options="-parameters" />
-      <module name="Notification-service" options="-parameters" />
-      <module name="api" options="-parameters" />
-      <module name="api-gateway1" options="-parameters" />
-      <module name="api-product" options="-parameters" />
-    </option>
   </component>
 </project>
