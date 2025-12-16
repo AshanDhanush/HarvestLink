@@ -8,9 +8,9 @@ spring:
     gateway:
       routes:
         - id: product-service
-          uri: http://localhost:8081
+          uri: http://localhost:8082
           predicates:
-            - Path=/api/v1/products/**
+            - Path=/api/products
           filters:
             - AddResponseHeader=X-Response-Time, "Gateway"
 
