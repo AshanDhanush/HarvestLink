@@ -1,7 +1,7 @@
 package com.HarvestLink.api_product.controller;
 
-import com.HarvestLink.api_product.model.dto.ProductRequest;
-import com.HarvestLink.api_product.model.dto.ProductResponse;
+import com.HarvestLink.api_product.model.ProductRequest;
+import com.HarvestLink.api_product.model.ProductResponse;
 import com.HarvestLink.api_product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
