@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from "react";
+import api from "../../api/axios";
 import {
   LayoutDashboard,
   Users,
@@ -30,6 +31,37 @@ const colors = {
   primaryDark: "#1a4d2e",
   primaryLime: "#8cc63f",
   bgLight: "#f3f4f6",
+};
+
+// Helpers for farmer ID generation: F001, F002, ...
+const formatFarmerId = (num) => `F${String(num).padStart(3, '0')}`;
+const getNextFarmerNumber = (farmers) => {
+  let max = 0;
+  for (const f of farmers) {
+    if (!f || f.id == null) continue;
+    const id = String(f.id);
+    if (id.startsWith('F')) {
+      const n = parseInt(id.slice(1), 10);
+      if (!Number.isNaN(n) && n > max) max = n;
+    } else {
+      const n = parseInt(id, 10);
+      if (!Number.isNaN(n) && n > max) max = n;
+    }
+  }
+  return max + 1;
+};
+
+const displayFarmerId = (id) => {
+  if (!id && id !== 0) return '';
+  const s = String(id);
+  if (s.startsWith('F')) {
+    const num = parseInt(s.slice(1), 10);
+    if (Number.isNaN(num)) return s;
+    return `F${String(num).padStart(3, '0')}`;
+  }
+  const n = parseInt(s, 10);
+  if (!Number.isNaN(n)) return `F${String(n).padStart(3, '0')}`;
+  return s;
 };
 
 // --- Mock Data (Overview) ---
@@ -311,9 +343,17 @@ const FarmerModal = ({ isOpen, onClose, onSave, editingFarmer }) => {
       email: "",
       contactNo: "",
       address: "",
-      role: "Farmer",
+      role: "FARMER",
+      password: "",
+      confirmPassword: "",
     }
   );
+
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      setFormData(editingFarmer || { firstName: "", lastName: "", email: "", contactNo: "", address: "", role: "FARMER", password: "", confirmPassword: "" });
+    });
+  }, [editingFarmer]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -325,10 +365,33 @@ const FarmerModal = ({ isOpen, onClose, onSave, editingFarmer }) => {
       alert("First name and either email or contact number are required!");
       return;
     }
+
+    // When creating a new farmer, password is required and must match
+    if (!editingFarmer) {
+      if (!formData.password) {
+        alert('Password is required when creating a new farmer');
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        alert('Password and Confirm Password do not match');
+        return;
+      }
+    } else {
+      // when editing, if password provided, confirm must match
+      if (formData.password && formData.password !== formData.confirmPassword) {
+        alert('Password and Confirm Password do not match');
+        return;
+      }
+    }
+
     const payload = { ...formData };
-    // ensure role is fixed to Farmer and remove any status field
-    payload.role = 'Farmer';
+    // ensure role is fixed to uppercase FARMER and remove any status field
+    payload.role = 'FARMER';
     if (payload.status) delete payload.status;
+    // only send password if provided
+    if (!payload.password) delete payload.password;
+    delete payload.confirmPassword;
+
     onSave(payload);
   };
 
@@ -398,6 +461,31 @@ const FarmerModal = ({ isOpen, onClose, onSave, editingFarmer }) => {
             </div>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                placeholder="Enter password"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Confirm Password</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                placeholder="Confirm password"
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">Address</label>
             <div className="relative">
@@ -450,12 +538,14 @@ const BusinessModal = ({ isOpen, onClose, onSave, editingBusiness }) => {
       contact: "",
       businessType: "Retail",
       status: "Active",
+      password: "",
+      confirmPassword: "",
     }
   );
 
   useEffect(() => {
     Promise.resolve().then(() => {
-      setFormData(editingBusiness || { name: "", location: "", contact: "", businessType: "Retail", status: "Active" });
+      setFormData(editingBusiness || { name: "", location: "", contact: "", businessType: "Retail", status: "Active", password: "", confirmPassword: "" });
     });
   }, [editingBusiness]);
 
@@ -469,7 +559,29 @@ const BusinessModal = ({ isOpen, onClose, onSave, editingBusiness }) => {
       alert("Name and Contact are required!");
       return;
     }
-    onSave(formData);
+
+    // When creating a new business, password required and must match
+    if (!editingBusiness) {
+      if (!formData.password) {
+        alert('Password is required when creating a new business');
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        alert('Password and Confirm Password do not match');
+        return;
+      }
+    } else {
+      if (formData.password && formData.password !== formData.confirmPassword) {
+        alert('Password and Confirm Password do not match');
+        return;
+      }
+    }
+
+    const payload = { ...formData };
+    if (!payload.password) delete payload.password;
+    delete payload.confirmPassword;
+
+    onSave(payload);
   };
 
   if (!isOpen) return null;
@@ -527,6 +639,31 @@ const BusinessModal = ({ isOpen, onClose, onSave, editingBusiness }) => {
               </div>
             </div>
           </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                  placeholder="Enter password"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Confirm Password</label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                  placeholder="Confirm password"
+                />
+              </div>
+            </div>
 
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">Business Type</label>
@@ -615,7 +752,7 @@ const FarmersCRUDSection = ({ farmers, onAddClick, onEditClick, onDeleteClick })
               {farmers.length > 0 ? (
                 farmers.map((farmer) => (
                   <tr key={farmer.id} className="hover:bg-gray-50 transition font-medium">
-                    <td className="px-6 py-4 text-gray-600">#{farmer.id}</td>
+                    <td className="px-6 py-4 text-gray-600">#{displayFarmerId(farmer.id)}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className={`h-8 w-8 rounded-full bg-lime-200 flex items-center justify-center font-bold`} style={{ color: colors.primaryDark }}>
@@ -632,7 +769,7 @@ const FarmersCRUDSection = ({ farmers, onAddClick, onEditClick, onDeleteClick })
                         {farmer.address || '-'}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">{farmer.role || 'Farmer'}</td>
+                        <td className="px-6 py-4 text-gray-600">{farmer.role ? String(farmer.role).toUpperCase() : 'FARMER'}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
                         <button onClick={() => onEditClick(farmer)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
@@ -855,44 +992,78 @@ export default function AdminDashboard() {
     setIsBusinessModalOpen(true);
   };
 
-  const handleSaveFarmer = (farmerData) => {
+  const handleSaveFarmer = async (farmerData) => {
     if (editingFarmer) {
       setFarmers(
         farmers.map((f) =>
           f.id === editingFarmer.id ? { ...f, ...farmerData } : f
         )
       );
-    } else {
-      const newId = farmers.length > 0 ? Math.max(...farmers.map(f => f.id)) + 1 : 1;
-      const newFarmer = {
-        id: newId,
-        ...farmerData,
-        joinDate: new Date().toISOString().split('T')[0]
-      };
-      setFarmers([...farmers, newFarmer]);
+      setIsModalOpen(false);
+      setEditingFarmer(null);
+      return;
     }
-    setIsModalOpen(false);
-    setEditingFarmer(null);
+
+    // Add new farmer -> POST to backend register endpoint
+    try {
+      const payload = { ...farmerData, role: 'FARMER' };
+      const res = await api.post('/admin/user/register', payload);
+      const created = res && res.data ? res.data : null;
+
+      // Determine next sequence number and formatted id
+      const nextNum = getNextFarmerNumber(farmers);
+      const formattedId = formatFarmerId(nextNum);
+
+      if (created) {
+        // enforce formatted farmer id locally
+        created.id = formattedId;
+        setFarmers([...farmers, created]);
+      } else {
+        // fallback to local formatted id
+        const newFarmer = { id: formattedId, ...payload, joinDate: new Date().toISOString().split('T')[0] };
+        setFarmers([...farmers, newFarmer]);
+      }
+
+      setIsModalOpen(false);
+      setEditingFarmer(null);
+    } catch (err) {
+      console.error('Failed to register farmer:', err);
+      alert('Failed to register farmer: ' + (err.response?.data?.message || err.message));
+    }
   };
 
-  const handleSaveBusiness = (businessData) => {
+  const handleSaveBusiness = async (businessData) => {
     if (editingBusiness) {
       setBusinesses(
         businesses.map((b) =>
           b.id === editingBusiness.id ? { ...b, ...businessData } : b
         )
       );
-    } else {
-      const newId = businesses.length > 0 ? Math.max(...businesses.map(b => b.id)) + 1 : 1;
-      const newBusiness = {
-        id: newId,
-        ...businessData,
-        joinDate: new Date().toISOString().split('T')[0]
-      };
-      setBusinesses([...businesses, newBusiness]);
+      setIsBusinessModalOpen(false);
+      setEditingBusiness(null);
+      return;
     }
-    setIsBusinessModalOpen(false);
-    setEditingBusiness(null);
+
+    // Add new business -> POST to backend register endpoint
+    try {
+      const payload = { ...businessData, role: 'Business' };
+      const res = await api.post('/admin/user/register', payload);
+      const created = res && res.data ? res.data : null;
+
+      if (created && created.id) {
+        setBusinesses([...businesses, created]);
+      } else {
+        const newId = businesses.length > 0 ? Math.max(...businesses.map(b => b.id)) + 1 : 1;
+        const newBusiness = { id: newId, ...payload, joinDate: new Date().toISOString().split('T')[0] };
+        setBusinesses([...businesses, newBusiness]);
+      }
+
+      setIsBusinessModalOpen(false);
+      setEditingBusiness(null);
+    } catch (err) {
+      console.error('Failed to register business:', err);
+      alert('Failed to register business: ' + (err.response?.data?.message || err.message));
+    }
   };
 
   return (

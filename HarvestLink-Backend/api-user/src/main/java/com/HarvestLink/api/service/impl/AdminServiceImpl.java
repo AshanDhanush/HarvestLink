@@ -42,6 +42,16 @@ public class AdminServiceImpl implements AdminService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<UserDto> getBusiness() {
+        List<com.HarvestLink.api.model.entity.User> farmers = userRepository.findByRole(Role.BUYER);
+
+        // 2. Map Entities to DTOs
+        return farmers.stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
     // Helper method to avoid duplicating mapping logic
     private UserDto mapToDto(User user) {
         return UserDto.builder()

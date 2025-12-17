@@ -9,4 +9,6 @@ public interface AdminService {
     List<UserDto> getAllUsers();
 
     List<UserDto> getFarmers();
+
+    List<UserDto> getBusiness();
 }

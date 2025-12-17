@@ -1,13 +1,14 @@
 package com.HarvestLink.api.controller;
 
+import com.HarvestLink.api.model.dto.RegisterRequest;
 import com.HarvestLink.api.model.dto.UserDto;
 import com.HarvestLink.api.service.AdminService;
+import com.HarvestLink.api.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,6 +18,8 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+    @Autowired
+    AuthService authService;
 
     @GetMapping("/users")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -29,5 +32,22 @@ public class AdminController {
     public ResponseEntity<List<UserDto>> getFarmers(){
         return ResponseEntity.ok(adminService.getFarmers());
     }
+
+    @GetMapping("/get/businesses")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<UserDto>> getBusiness(){
+        return ResponseEntity.ok(adminService.getBusiness());
+    }
+
+    @PostMapping("user/register")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> userRegister(@RequestBody RegisterRequest request){
+        return ResponseEntity.ok(authService.register(request));
+    }
+
+
+
+
+
 
 }
