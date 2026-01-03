@@ -45,6 +45,20 @@ public class AdminController {
         return ResponseEntity.ok(authService.register(request));
     }
 
+    @PutMapping("user/update")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> updateUser(@RequestBody UserDto userDto){
+        return ResponseEntity.ok(adminService.updateUser(userDto));
+    }
+
+    @DeleteMapping("user/delete/{userEmail}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> deleteUser(@PathVariable String userEmail){
+        return ResponseEntity.ok(adminService.deleteUser(userEmail));
+    }
+
+
+
 
 
 

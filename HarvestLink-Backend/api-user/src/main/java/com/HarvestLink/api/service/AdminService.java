@@ -11,4 +11,8 @@ public interface AdminService {
     List<UserDto> getFarmers();
 
     List<UserDto> getBusiness();
+
+    Object updateUser(UserDto userDto);
+
+    Object deleteUser(String userEmail);
 }

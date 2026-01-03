@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import api from "../../api/axios";
+import authService from "../../services/authService";
 import {
   LayoutDashboard,
   Users,
@@ -25,6 +26,7 @@ import {
   Sprout // Added for logo placeholder
 } from "lucide-react";
 import logo from "../../assets/Logo-L_1@0.75x.png";
+import axios from "axios";
 
 // --- Colors ---
 const colors = {
@@ -61,6 +63,37 @@ const displayFarmerId = (id) => {
   }
   const n = parseInt(s, 10);
   if (!Number.isNaN(n)) return `F${String(n).padStart(3, '0')}`;
+  return s;
+};
+
+// --- Business ID helpers (B001, B002, ...)
+const formatBusinessId = (num) => `B${String(num).padStart(3, '0')}`;
+const getNextBusinessNumber = (businesses) => {
+  let max = 0;
+  for (const b of businesses) {
+    if (!b || b.id == null) continue;
+    const id = String(b.id);
+    if (id.startsWith('B')) {
+      const n = parseInt(id.slice(1), 10);
+      if (!Number.isNaN(n) && n > max) max = n;
+    } else {
+      const n = parseInt(id, 10);
+      if (!Number.isNaN(n) && n > max) max = n;
+    }
+  }
+  return max + 1;
+};
+
+const displayBusinessId = (id) => {
+  if (!id && id !== 0) return '';
+  const s = String(id);
+  if (s.startsWith('B')) {
+    const num = parseInt(s.slice(1), 10);
+    if (Number.isNaN(num)) return s;
+    return `B${String(num).padStart(3, '0')}`;
+  }
+  const n = parseInt(s, 10);
+  if (!Number.isNaN(n)) return `B${String(n).padStart(3, '0')}`;
   return s;
 };
 
@@ -377,8 +410,12 @@ const FarmerModal = ({ isOpen, onClose, onSave, editingFarmer }) => {
         return;
       }
     } else {
-      // when editing, if password provided, confirm must match
-      if (formData.password && formData.password !== formData.confirmPassword) {
+      // when editing, require both password and confirmPassword and ensure they match
+      if (!formData.password || !formData.confirmPassword) {
+        alert('Password and Confirm Password are required when editing a farmer');
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
         alert('Password and Confirm Password do not match');
         return;
       }
@@ -529,15 +566,16 @@ const FarmerModal = ({ isOpen, onClose, onSave, editingFarmer }) => {
   );
 };
 
-// 6b. Business Modal
+// 6b. Business Modal (match Farmer form)
 const BusinessModal = ({ isOpen, onClose, onSave, editingBusiness }) => {
   const [formData, setFormData] = useState(
     editingBusiness || {
-      name: "",
-      location: "",
-      contact: "",
-      businessType: "Retail",
-      status: "Active",
+      firstName: "",
+      lastName: "",
+      email: "",
+      contactNo: "",
+      address: "",
+      role: "Buyer",
       password: "",
       confirmPassword: "",
     }
@@ -545,7 +583,18 @@ const BusinessModal = ({ isOpen, onClose, onSave, editingBusiness }) => {
 
   useEffect(() => {
     Promise.resolve().then(() => {
-      setFormData(editingBusiness || { name: "", location: "", contact: "", businessType: "Retail", status: "Active", password: "", confirmPassword: "" });
+      setFormData(
+        editingBusiness || {
+          firstName: "",
+          lastName: "",
+          email: "",
+          contactNo: "",
+          address: "",
+          role: "Buyer",
+          password: "",
+          confirmPassword: "",
+        }
+      );
     });
   }, [editingBusiness]);
 
@@ -555,12 +604,11 @@ const BusinessModal = ({ isOpen, onClose, onSave, editingBusiness }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.contact) {
-      alert("Name and Contact are required!");
+    if (!formData.firstName || (!formData.email && !formData.contactNo)) {
+      alert("First name and either email or contact number are required!");
       return;
     }
 
-    // When creating a new business, password required and must match
     if (!editingBusiness) {
       if (!formData.password) {
         alert('Password is required when creating a new business');
@@ -578,6 +626,7 @@ const BusinessModal = ({ isOpen, onClose, onSave, editingBusiness }) => {
     }
 
     const payload = { ...formData };
+    payload.role = String(formData.role || 'BUYER').toUpperCase();
     if (!payload.password) delete payload.password;
     delete payload.confirmPassword;
 
@@ -587,7 +636,7 @@ const BusinessModal = ({ isOpen, onClose, onSave, editingBusiness }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center font-sans">
+    <div className="fixed inset-0 backdrop-blur-xs bg-opacity-50 z-50 flex justify-center items-center font-sans">
       <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 overflow-hidden">
         <div className="flex justify-between items-center p-6 border-b border-gray-100" style={{ backgroundColor: colors.bgLight }}>
           <h3 className="text-lg font-bold text-gray-800">{editingBusiness ? "Edit Business" : "Add New Business"}</h3>
@@ -597,32 +646,42 @@ const BusinessModal = ({ isOpen, onClose, onSave, editingBusiness }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">Business Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
-              placeholder="e.g., Colombo Fresh Market"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">First Name</label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                placeholder="e.g., John"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Last Name</label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                placeholder="e.g., Smith"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Location</label>
-              <div className="relative">
-                <MapPin size={18} className="absolute left-3 top-3.5 text-gray-400" />
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
-                  placeholder="e.g., Colombo"
-                />
-              </div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                placeholder="example@domain.com"
+              />
             </div>
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">Contact Number</label>
@@ -630,8 +689,8 @@ const BusinessModal = ({ isOpen, onClose, onSave, editingBusiness }) => {
                 <Phone size={18} className="absolute left-3 top-3.5 text-gray-400" />
                 <input
                   type="text"
-                  name="contact"
-                  value={formData.contact}
+                  name="contactNo"
+                  value={formData.contactNo}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
                   placeholder="07X-XXXXXXX"
@@ -640,57 +699,57 @@ const BusinessModal = ({ isOpen, onClose, onSave, editingBusiness }) => {
             </div>
           </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
-                  placeholder="Enter password"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Confirm Password</label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
-                  placeholder="Confirm password"
-                />
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                placeholder="Enter password"
+              />
             </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">Business Type</label>
-            <select
-              name="businessType"
-              value={formData.businessType}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
-            >
-              <option value="Retail">Retail</option>
-              <option value="Restaurant">Restaurant</option>
-              <option value="Distributor">Distributor</option>
-            </select>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Confirm Password</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                placeholder="Confirm password"
+              />
+            </div>
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">Status</label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
-            >
-              <option value="Active">Active</option>
-              <option value="Pending">Pending</option>
-              <option value="Inactive">Inactive</option>
-            </select>
+            <label className="block text-sm font-bold text-gray-700 mb-2">Address</label>
+            <div className="relative">
+              <MapPin size={18} className="absolute left-3 top-3.5 text-gray-400" />
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-lime-400 focus:bg-white focus:ring-0 transition font-medium"
+                placeholder="e.g., Colombo"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Role</label>
+              <input
+                type="text"
+                name="role"
+                value={formData.role || 'BUYER'}
+                readOnly
+                className="w-full px-4 py-3 rounded-lg bg-gray-100 border border-gray-200 text-gray-700 cursor-not-allowed font-medium"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
@@ -710,14 +769,7 @@ const BusinessModal = ({ isOpen, onClose, onSave, editingBusiness }) => {
 
 // 7. Farmers CRUD Section
 const FarmersCRUDSection = ({ farmers, onAddClick, onEditClick, onDeleteClick }) => {
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Active": return "bg-green-100 text-green-700";
-      case "Pending": return "bg-yellow-100 text-yellow-700";
-      case "Inactive": return "bg-red-100 text-red-700";
-      default: return "bg-gray-100 text-gray-700";
-    }
-  };
+ 
 
   
 
@@ -775,7 +827,7 @@ const FarmersCRUDSection = ({ farmers, onAddClick, onEditClick, onDeleteClick })
                         <button onClick={() => onEditClick(farmer)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
                           <Edit size={18} />
                         </button>
-                        <button onClick={() => onDeleteClick(farmer.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
+                        <button onClick={() => onDeleteClick(farmer.email)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -799,20 +851,13 @@ const FarmersCRUDSection = ({ farmers, onAddClick, onEditClick, onDeleteClick })
 
 // 8. Businesses CRUD Section
 const BusinessesCRUDSection = ({ businesses, onAddClick, onEditClick, onDeleteClick }) => {
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Active": return "bg-green-100 text-green-700";
-      case "Pending": return "bg-yellow-100 text-yellow-700";
-      case "Inactive": return "bg-red-100 text-red-700";
-      default: return "bg-gray-100 text-gray-700";
-    }
-  };
+  
 
   return (
     <div className="space-y-6 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Businesses Management</h1>
+          <h1 classNam="text-2xl font-bold text-gray-800">Businesses Management</h1>
           <p className="text-gray-500 text-sm font-medium">Manage registered businesses and partners.</p>
         </div>
         <button onClick={onAddClick} className={`flex items-center gap-2 text-white px-5 py-3 rounded-lg hover:bg-opacity-90 transition font-bold shadow-sm`} style={{ backgroundColor: colors.primaryDark }}>
@@ -827,10 +872,11 @@ const BusinessesCRUDSection = ({ businesses, onAddClick, onEditClick, onDeleteCl
             <thead className="bg-gray-50 text-gray-500 text-sm uppercase tracking-wider">
               <tr>
                 <th className="px-6 py-4 font-bold">ID</th>
-                <th className="px-6 py-4 font-bold">Business Name</th>
-                <th className="px-6 py-4 font-bold">Location</th>
+                <th className="px-6 py-4 font-bold">Name</th>
+                <th className="px-6 py-4 font-bold">Email</th>
                 <th className="px-6 py-4 font-bold">Contact</th>
-                <th className="px-6 py-4 font-bold">Type</th>
+                <th className="px-6 py-4 font-bold">Address</th>
+                <th className="px-6 py-4 font-bold">Role</th>
                 <th className="px-6 py-4 font-bold text-right">Actions</th>
               </tr>
             </thead>
@@ -839,16 +885,17 @@ const BusinessesCRUDSection = ({ businesses, onAddClick, onEditClick, onDeleteCl
                 businesses.map((b) => (
                   <tr key={b.id} className="hover:bg-gray-50 transition font-medium">
                     <td className="px-6 py-4 text-gray-600">#{b.id}</td>
-                    <td className="px-6 py-4 text-gray-800 font-bold">{b.name}</td>
-                    <td className="px-6 py-4 text-gray-600">{b.location}</td>
-                    <td className="px-6 py-4 text-gray-600">{b.contact}</td>
-                    <td className="px-6 py-4 text-gray-600">{b.businessType}</td>
+                    <td className="px-6 py-4 text-gray-800 font-bold">{`${b.firstName || ''} ${b.lastName || ''}`.trim()}</td>
+                    <td className="px-6 py-4 text-gray-600">{b.email}</td>
+                    <td className="px-6 py-4 text-gray-600">{b.contactNo}</td>
+                    <td className="px-6 py-4 text-gray-600">{b.address}</td>
+                    <td className="px-6 py-4 text-gray-600">{b.role}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
                         <button onClick={() => onEditClick(b)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
                           <Edit size={18} />
                         </button>
-                        <button onClick={() => onDeleteClick(b.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
+                        <button onClick={() => onDeleteClick(b.email)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -960,15 +1007,44 @@ export default function AdminDashboard() {
   }, []);
 
   // === CRUD Handlers ===
-  const handleDeleteClick = (id) => {
-    if (window.confirm("Are you sure you want to delete this farmer?")) {
-      setFarmers(farmers.filter((farmer) => farmer.id !== id));
+  const handleDeleteClick = async (email) => {
+    if (!email) return alert('No farmer identifier provided');
+    if (!window.confirm("Are you sure you want to delete this farmer?")) return;
+
+    try {
+      // call backend to delete farmer (email used as identifier)
+      const encoded = encodeURIComponent(email);
+      const res = await api.delete(`/admin/user/delete/${encoded}`);
+
+      // remove from local state on success
+      setFarmers((prev) => prev.filter((farmer) => farmer.email !== email));
+
+      const msg = res?.data || 'Farmer deleted successfully';
+      alert(msg);
+    } catch (err) {
+      console.error('Failed to delete farmer:', err);
+      alert('Delete failed: ' + (err.response?.data || err.message));
     }
   };
 
-  const handleBusinessDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this business?")) {
-      setBusinesses(businesses.filter((b) => b.id !== id));
+
+  const handleBusinessDelete = async (email) => {
+    if (!email) return alert('No farmer identifier provided');
+    if (!window.confirm("Are you sure you want to delete this farmer?")) return;
+
+    try {
+      // call backend to delete buyers (email used as identifier)
+      const encoded = encodeURIComponent(email);
+      const res = await api.delete(`/admin/user/delete/${encoded}`);
+
+      // remove from local state on success
+      setBusinesses((prev) => prev.filter((business) => business.email !== email));
+
+      const msg = res?.data || 'Business deleted successfully';
+      alert(msg);
+    } catch (err) {
+      console.error('Failed to delete business:', err);
+      alert('Delete failed: ' + (err.response?.data || err.message));
     }
   };
 
@@ -993,69 +1069,106 @@ export default function AdminDashboard() {
   };
 
   const handleSaveFarmer = async (farmerData) => {
+    // If editing, update existing farmer via backend
     if (editingFarmer) {
-      setFarmers(
-        farmers.map((f) =>
-          f.id === editingFarmer.id ? { ...f, ...farmerData } : f
-        )
-      );
-      setIsModalOpen(false);
-      setEditingFarmer(null);
+      try {
+        const token = authService.getToken();
+        if (!token) {
+          alert("Unauthorized");
+          return;
+        }
+
+        const payload = {
+          email: farmerData.email,
+          firstName: farmerData.firstName,
+          lastName: farmerData.lastName,
+          contactNo: farmerData.contactNo,
+          address: farmerData.address,
+          role: "FARMER"
+        };
+
+        const res = await api.put("/admin/user/update", payload, {
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        });
+
+        setFarmers((prev) => prev.map((f) => (f.email === payload.email ? { ...f, ...payload } : f)));
+
+        alert(res?.data || "Farmer updated");
+        setIsModalOpen(false);
+        setEditingFarmer(null);
+      } catch (err) {
+        console.error("Failed to update farmer:", err);
+        alert("Update failed: " + (err.response?.data || err.message));
+      }
       return;
     }
 
-    // Add new farmer -> POST to backend register endpoint
+    // Otherwise create new farmer via backend register endpoint
     try {
-      const payload = { ...farmerData, role: 'FARMER' };
-      const res = await api.post('/admin/user/register', payload);
-      const created = res && res.data ? res.data : null;
+      const payload = { ...farmerData, role: "FARMER" };
+      const res = await api.post("/admin/user/register", payload);
+      const created = res?.data || null;
 
-      // Determine next sequence number and formatted id
-      const nextNum = getNextFarmerNumber(farmers);
-      const formattedId = formatFarmerId(nextNum);
-
-      if (created) {
-        // enforce formatted farmer id locally
-        created.id = formattedId;
-        setFarmers([...farmers, created]);
+      if (created && (created.email || created.id)) {
+        setFarmers((prev) => [...prev, created]);
       } else {
-        // fallback to local formatted id
-        const newFarmer = { id: formattedId, ...payload, joinDate: new Date().toISOString().split('T')[0] };
-        setFarmers([...farmers, newFarmer]);
+        // fallback local entry
+        const nextNum = getNextFarmerNumber(farmers);
+        const newId = formatFarmerId(nextNum);
+        const newFarmer = { id: newId, ...payload, joinDate: new Date().toISOString().split("T")[0] };
+        setFarmers((prev) => [...prev, newFarmer]);
       }
 
       setIsModalOpen(false);
       setEditingFarmer(null);
+      alert("Farmer created successfully");
     } catch (err) {
-      console.error('Failed to register farmer:', err);
-      alert('Failed to register farmer: ' + (err.response?.data?.message || err.message));
+      console.error("Failed to create farmer:", err);
+      alert("Failed to create farmer: " + (err.response?.data?.message || err.message));
     }
-  };
+};
+
 
   const handleSaveBusiness = async (businessData) => {
+    // If editing, update existing business via backend
     if (editingBusiness) {
-      setBusinesses(
-        businesses.map((b) =>
-          b.id === editingBusiness.id ? { ...b, ...businessData } : b
-        )
-      );
-      setIsBusinessModalOpen(false);
-      setEditingBusiness(null);
+      try {
+        const token = authService.getToken();
+        if (!token) {
+          alert('Unauthorized');
+          return;
+        }
+
+        const payload = { ...businessData, role: String(businessData.role || 'BUYER').toUpperCase() };
+
+        const res = await api.put('/admin/user/update', payload, {
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        });
+
+        setBusinesses((prev) => prev.map((b) => (b.email === payload.email ? { ...b, ...payload } : b)));
+
+        alert(res?.data || 'Business updated');
+        setIsBusinessModalOpen(false);
+        setEditingBusiness(null);
+      } catch (err) {
+        console.error('Failed to update business:', err);
+        alert('Update failed: ' + (err.response?.data || err.message));
+      }
       return;
     }
 
     // Add new business -> POST to backend register endpoint
     try {
-      const payload = { ...businessData, role: 'Business' };
+      const payload = { ...businessData, role: String(businessData.role || 'BUYER').toUpperCase() };
       const res = await api.post('/admin/user/register', payload);
       const created = res && res.data ? res.data : null;
 
       if (created && created.id) {
-        setBusinesses([...businesses, created]);
+        setBusinesses((prev) => [...prev, created]);
       } else {
-        const newId = businesses.length > 0 ? Math.max(...businesses.map(b => b.id)) + 1 : 1;
+        const newId = businesses.length > 0 ? Math.max(...businesses.map((b) => b.id)) + 1 : 1;
         const newBusiness = { id: newId, ...payload, joinDate: new Date().toISOString().split('T')[0] };
-        setBusinesses([...businesses, newBusiness]);
+        setBusinesses((prev) => [...prev, newBusiness]);
       }
 
       setIsBusinessModalOpen(false);
