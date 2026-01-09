@@ -26,7 +26,6 @@ import {
   Sprout // Added for logo placeholder
 } from "lucide-react";
 import logo from "../../assets/Logo-L_1@0.75x.png";
-import axios from "axios";
 
 // --- Colors ---
 const colors = {
