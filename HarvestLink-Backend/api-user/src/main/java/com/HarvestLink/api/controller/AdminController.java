@@ -1,7 +1,9 @@
 package com.HarvestLink.api.controller;
 
+import com.HarvestLink.api.model.dto.ProductRequest;
 import com.HarvestLink.api.model.dto.RegisterRequest;
 import com.HarvestLink.api.model.dto.UserDto;
+import com.HarvestLink.api.service.AdminProductProducerService;
 import com.HarvestLink.api.service.AdminService;
 import com.HarvestLink.api.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +20,11 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
-    @Autowired
-    AuthService authService;
+
+    private final AuthService authService;
+
+
+    private final AdminProductProducerService adminProductProducerService;
 
     @GetMapping("/users")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -55,6 +60,11 @@ public class AdminController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable String userEmail){
         return ResponseEntity.ok(adminService.deleteUser(userEmail));
+    }
+
+    @PostMapping("product/saveByAdmin")
+    public ResponseEntity<?> saveProductByAdmin(@RequestBody ProductRequest productRequest){
+        return ResponseEntity.ok(adminProductProducerService.sendProduct(productRequest));
     }
 
 
