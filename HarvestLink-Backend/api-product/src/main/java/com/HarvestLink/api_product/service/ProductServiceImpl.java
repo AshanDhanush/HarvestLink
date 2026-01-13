@@ -8,8 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -45,14 +47,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void deleteProduct(String id) {
-        if (!productRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+    @Transactional
+    public boolean deleteProduct(String tempid) {
+        if (!productRepository.existsByTempID(tempid)) {
+            throw new RuntimeException("Product not found: " + tempid);
         }
-        productRepository.deleteById(id);
+        productRepository.deleteByTempID(tempid);
 
 
-        kafkaTemplate.send(TOPIC, "DELETE", id);
+        kafkaTemplate.send(TOPIC, "DELETE", tempid);
+        return true;
     }
 
 
@@ -68,10 +72,36 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Product mapToProduct(ProductRequest req) {
-        return new Product(null, req.getName(), req.getDescription(), req.getPrice(), req.getQuantity());
+        return new Product(null,generateTempId(), req.getName(), req.getDescription(), req.getPrice(), req.getQuantity());
     }
 
     private ProductResponse mapToProductResponse(Product p) {
-        return new ProductResponse(p.getId(), p.getName(), p.getDescription(), p.getPrice(), p.getQuantity());
+        return new ProductResponse(p.getTempID(), p.getName(), p.getDescription(), p.getPrice(), p.getQuantity());
+    }
+
+    private String generateTempId() {
+        List<Product> products = productRepository.findAll();
+
+        if (products.isEmpty()) {
+            return "P001";
+        } else {
+            int maxId = 0;
+
+            for (Product product : products) {
+                String tempId = product.getTempID();
+                if (tempId != null && tempId.startsWith("P")) {
+                    try {
+                        int currentId = Integer.parseInt(tempId.substring(1));
+                        if (currentId > maxId) {
+                            maxId = currentId;
+                        }
+                    } catch (NumberFormatException e) {
+                    }
+                }
+            }
+
+            int nextId = maxId + 1;
+            return String.format("P%03d", nextId);
+        }
     }
 }

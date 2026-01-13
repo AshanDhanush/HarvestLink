@@ -23,4 +23,10 @@ public class ProductKafkaConsumer {
 
         log.info("Product processed successfully.");
     }
+    @KafkaListener(topics = "product-delete", groupId = "product-group")
+    public void consumeDelete(String id){
+        log.info("Received delete id event from Kafka : {}",id);
+        productService.deleteProduct(id);
+        log.info("Product delete successfully");
+    }
 }

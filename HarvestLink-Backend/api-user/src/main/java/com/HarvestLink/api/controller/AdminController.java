@@ -67,6 +67,11 @@ public class AdminController {
         return ResponseEntity.ok(adminProductProducerService.sendProduct(productRequest));
     }
 
+    @DeleteMapping("/product/delete/byAdmin/{id}")
+    public ResponseEntity<?> deleteProduct(@PathVariable String id){
+        return ResponseEntity.ok(adminProductProducerService.deleteProduct(id));
+    }
+
 
 
 

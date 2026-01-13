@@ -28,4 +28,16 @@ public class AdminProductProducerServiceImpl implements AdminProductProducerServ
 
         return "Product creation request sent successfully";
     }
+
+    @Override
+    public String deleteProduct(String id) {
+        Message<String> message = MessageBuilder
+                .withPayload(id)
+                .setHeader(KafkaHeaders.TOPIC,"product-delete")
+                .build();
+
+        kafkaTemplate.send(message);
+        return "Product Delete successfully";
+    }
+
 }

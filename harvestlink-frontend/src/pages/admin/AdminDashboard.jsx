@@ -916,6 +916,79 @@ const BusinessesCRUDSection = ({ businesses, onAddClick, onEditClick, onDeleteCl
   );
 };
 
+// 9. Products CRUD Section
+const ProductsCRUDSection = ({ products, onAddClick, onEditClick, onDeleteClick }) => {
+  return (
+    <div className="space-y-6 font-sans">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Products Management</h1>
+          <p className="text-gray-500 text-sm font-medium">Manage all agricultural products in the system.</p>
+        </div>
+        <button onClick={onAddClick} className={`flex items-center gap-2 text-white px-5 py-3 rounded-lg hover:bg-opacity-90 transition font-bold shadow-sm`} style={{ backgroundColor: colors.primaryDark }}>
+          <Plus size={20} />
+          <span>Add New Product</span>
+        </button>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-gray-50 text-gray-500 text-sm uppercase tracking-wider">
+              <tr>
+                <th className="px-6 py-4 font-bold">ID</th>
+                <th className="px-6 py-4 font-bold">Product Name</th>
+                <th className="px-6 py-4 font-bold">Category</th>
+                <th className="px-6 py-4 font-bold">Price</th>
+                <th className="px-6 py-4 font-bold">Stock</th>
+                <th className="px-6 py-4 font-bold">Farmer</th>
+                <th className="px-6 py-4 font-bold text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 text-sm">
+              {products.length > 0 ? (
+                products.map((product) => (
+                  <tr key={product.id} className="hover:bg-gray-50 transition font-medium">
+                    <td className="px-6 py-4 text-gray-600">#{product.id}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`h-8 w-8 rounded-full bg-lime-200 flex items-center justify-center font-bold`} style={{ color: colors.primaryDark }}>
+                          {product.productName ? product.productName.charAt(0).toUpperCase() : 'P'}
+                        </div>
+                        <span className="text-gray-800 font-bold">{product.productName || '-'}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{product.category || '-'}</td>
+                    <td className="px-6 py-4 text-gray-600">Rs. {product.price || '-'}</td>
+                    <td className="px-6 py-4 text-gray-600">{product.quantity || '0'} kg</td>
+                    <td className="px-6 py-4 text-gray-600">{product.farmerName || '-'}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => onEditClick(product)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
+                          <Edit size={18} />
+                        </button>
+                        <button onClick={() => onDeleteClick(product.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="px-6 py-8 text-center text-gray-500 font-medium">
+                    No products found. Click "Add New Product" to start.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- Main Layout Structure ---
 export default function AdminDashboard() {
   const [currentView, setCurrentView] = useState("overview");
@@ -932,6 +1005,12 @@ export default function AdminDashboard() {
   const [businessesError, setBusinessesError] = useState(null);
   const [isBusinessModalOpen, setIsBusinessModalOpen] = useState(false);
   const [editingBusiness, setEditingBusiness] = useState(null);
+  // Products state
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [productsError, setProductsError] = useState(null);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   // Fetch farmers from backend on mount
   useEffect(() => {
@@ -1005,6 +1084,41 @@ export default function AdminDashboard() {
     return () => { mounted = false; };
   }, []);
 
+  // Fetch products from backend on mount
+  useEffect(() => {
+    const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8085';
+    let mounted = true;
+
+    (async () => {
+      await Promise.resolve();
+      if (!mounted) return;
+      setLoadingProducts(true);
+      setProductsError(null);
+
+      try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const res = await fetch(`${API_BASE}/api/product/getAll`, {
+          method: 'GET',
+          headers,
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (mounted) setProducts(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch products:', err);
+        if (mounted) setProductsError(err.message || 'Failed to load products');
+      } finally {
+        if (mounted) setLoadingProducts(false);
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, []);
+
   // === CRUD Handlers ===
   const handleDeleteClick = async (email) => {
     if (!email) return alert('No farmer identifier provided');
@@ -1065,6 +1179,41 @@ export default function AdminDashboard() {
   const handleEditBusinessClick = (business) => {
     setEditingBusiness(business);
     setIsBusinessModalOpen(true);
+  };
+
+  const handleAddProductClick = () => {
+    setEditingProduct(null);
+    setIsProductModalOpen(true);
+  };
+
+  const handleEditProductClick = (product) => {
+    setEditingProduct(product);
+    setIsProductModalOpen(true);
+  };
+
+  const handleDeleteProductClick = async (productId) => {
+    if (!productId) return alert('No product identifier provided');
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+
+    try {
+      const token = authService.getToken();
+      if (!token) {
+        alert("Unauthorized");
+        return;
+      }
+
+      console.log('Deleting product with ID:', productId);
+      const res = await api.delete(`/api/v1/admin/product/delete/byAdmin/${productId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProducts((prev) => prev.filter((product) => product.id !== productId));
+      const msg = res?.data || 'Product deleted successfully';
+      alert(msg);
+    } catch (err) {
+      console.error('Failed to delete product:', err);
+      console.error('Error response data:', err.response?.data);
+      alert('Delete failed: ' + (err.message));
+    }
   };
 
   const handleSaveFarmer = async (farmerData) => {
@@ -1253,6 +1402,24 @@ export default function AdminDashboard() {
                   onAddClick={handleAddBusinessClick}
                   onEditClick={handleEditBusinessClick}
                   onDeleteClick={handleBusinessDelete}
+                />
+              )}
+            </>
+          )}
+
+          {/* === VIEW: PRODUCTS CRUD === */}
+          {currentView === "products" && (
+            <>
+              {loadingProducts ? (
+                <div className="p-6 bg-white rounded-xl shadow-sm text-center">Loading products...</div>
+              ) : productsError ? (
+                <div className="p-6 bg-white rounded-xl shadow-sm text-center text-red-600">Error loading products: {productsError}</div>
+              ) : (
+                <ProductsCRUDSection
+                  products={products}
+                  onAddClick={handleAddProductClick}
+                  onEditClick={handleEditProductClick}
+                  onDeleteClick={handleDeleteProductClick}
                 />
               )}
             </>
