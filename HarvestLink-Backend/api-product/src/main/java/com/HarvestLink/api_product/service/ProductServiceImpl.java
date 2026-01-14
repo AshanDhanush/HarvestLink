@@ -1,5 +1,6 @@
 package com.HarvestLink.api_product.service;
 
+import com.HarvestLink.api_product.model.OrderItems;
 import com.HarvestLink.api_product.model.Product;
 import com.HarvestLink.api_product.model.ProductRequest;
 import com.HarvestLink.api_product.model.ProductResponse;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -57,6 +57,19 @@ public class ProductServiceImpl implements ProductService {
 
         kafkaTemplate.send(TOPIC, "DELETE", tempid);
         return true;
+    }
+
+    @Override
+    public void UpdateStock(List<OrderItems> orderItems) {
+        for(OrderItems i : orderItems) {
+            Product product = productRepository.findByTempID(i.getProductId()).orElseThrow();
+            int quantity = product.getQuantity();
+            System.out.println(quantity);
+            int newQuantity =  quantity - i.getQuantity();
+            System.out.println(newQuantity);
+            product.setQuantity(newQuantity);
+            productRepository.save(product);
+        }
     }
 
 

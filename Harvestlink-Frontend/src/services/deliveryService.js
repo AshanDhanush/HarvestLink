@@ -1,9 +1,10 @@
+import axios from 'axios';
 import api from '../api/axios';
 
 const deliveryService = {
     // Get all products
     getAllProducts: async () => {
-        const response = await api.get('/products');
+        const response = await axios.get('http://localhost:8085/api/product/getAll');
         return response.data;
     },
 

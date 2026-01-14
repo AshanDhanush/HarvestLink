@@ -1,11 +1,15 @@
 package com.HarvestLink.api_product.consumer; // Adjust package to your folder structure
 
+import com.HarvestLink.api_product.model.OrderItems;
 import com.HarvestLink.api_product.model.ProductRequest; // Ensure you have this DTO
 import com.HarvestLink.api_product.service.ProductService;   // Ensure you have this Service
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,4 +33,13 @@ public class ProductKafkaConsumer {
         productService.deleteProduct(id);
         log.info("Product delete successfully");
     }
+
+    @KafkaListener(topics = "product-update1",groupId = "product-group")
+    public void updateProduct(List<OrderItems> orderItems){
+         log.info("Received update product info from kafka");
+         productService.UpdateStock(orderItems);
+         log.info("Product update successfully");
+    }
+
+
 }
