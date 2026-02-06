@@ -18,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -128,6 +130,51 @@ public class OrderServiceImpl implements OrderService {
 
         return orderResponses;
     }
+
+    @Override
+    public Map<String, Object> getMonthlyRevenueAnalytics() {
+        LocalDate now = LocalDate.now();
+
+
+        LocalDate startCurrentMonth = now.withDayOfMonth(1);
+        LocalDate endCurrentMonth = now.withDayOfMonth(now.lengthOfMonth());
+
+        LocalDate startLastMonth = now.minusMonths(1).withDayOfMonth(1);
+        LocalDate endLastMonth = now.minusMonths(1).withDayOfMonth(now.minusMonths(1).lengthOfMonth());
+
+
+        List<OrderDetails> currentMonthOrders = orderDetailsRepository.findByDateBetween(startCurrentMonth, endCurrentMonth);
+        List<OrderDetails> lastMonthOrders = orderDetailsRepository.findByDateBetween(startLastMonth, endLastMonth);
+
+
+        double currentMonthTotal = currentMonthOrders.stream()
+                .mapToDouble(OrderDetails::getTotalPrice)
+                .sum();
+
+        double lastMonthTotal = lastMonthOrders.stream()
+                .mapToDouble(OrderDetails::getTotalPrice)
+                .sum();
+
+
+        double percentageChange;
+        if (lastMonthTotal == 0) {
+            percentageChange = (currentMonthTotal > 0) ? 100.0 : 0.0;
+        } else {
+            percentageChange = ((currentMonthTotal - lastMonthTotal) / lastMonthTotal) * 100;
+        }
+
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("currentMonthTotal", currentMonthTotal);
+        response.put("lastMonthTotal", lastMonthTotal);
+        response.put("percentageChange", Math.round(percentageChange * 100.0) / 100.0);
+        System.out.println(currentMonthTotal);
+        System.out.println(lastMonthTotal);
+        System.out.println(percentageChange);
+
+        return response;
+    }
+
 
     private String generateTempId() {
         List<OrderDetails> orders = orderDetailsRepository.findAll();

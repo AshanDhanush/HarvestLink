@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/order")
@@ -32,5 +33,10 @@ public class OrderController {
     public List<OrderResponse> getOrders(){
         return orderService.getOrders();
     }
+    @GetMapping("get/revenue")
+    public ResponseEntity<Map<String, Object>> getMonthlyAnalytics() {
+        return ResponseEntity.ok(orderService.getMonthlyRevenueAnalytics());
+    }
+
 
 }

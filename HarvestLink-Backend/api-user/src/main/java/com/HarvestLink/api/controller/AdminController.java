@@ -71,6 +71,10 @@ public class AdminController {
     public ResponseEntity<?> deleteProduct(@PathVariable String id){
         return ResponseEntity.ok(adminProductProducerService.deleteProduct(id));
     }
+    @GetMapping("get/farmers/total")
+    public int getFarmersTotal(){
+        return adminService.getFarmersTotal();
+    }
 
 
 

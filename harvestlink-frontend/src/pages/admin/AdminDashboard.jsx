@@ -1080,6 +1080,12 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [ordersError, setOrdersError] = useState(null);
+  // Revenue state
+  const [revenueData, setRevenueData] = useState({
+    currentMonthTotal: 450000,
+    lastMonthTotal: 400000,
+    percentageChange: 12.5,
+  });
 
   // Fetch farmers from backend on mount
   useEffect(() => {
@@ -1204,12 +1210,49 @@ export default function AdminDashboard() {
         if (token) headers.Authorization = `Bearer ${token}`;
 
         const res = await axios.get('http://localhost:8085/api/order/get/Orders', { headers });
-        if (mounted) setOrders(Array.isArray(res.data) ? res.data : []);
+        const raw = Array.isArray(res.data) ? res.data : [];
+        const normalized = raw.map((o) => {
+          const customerName = o.customerName
+            || o.customer
+            || (o.customer && (o.customer.name || o.customer.fullName || o.customer.businessName))
+            || o.user?.name
+            || o.buyerName
+            || ((o.customerFirstName || o.customerLastName) ? `${o.customerFirstName || ''} ${o.customerLastName || ''}`.trim() : undefined)
+            || "N/A";
+
+          return { ...o, customerName };
+        });
+        if (mounted) setOrders(normalized);
       } catch (err) {
         console.error('Failed to fetch orders:', err);
         if (mounted) setOrdersError(err.response?.data?.message || err.message || 'Failed to load orders');
       } finally {
         if (mounted) setLoadingOrders(false);
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, []);
+
+  // Fetch revenue data from backend
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      await Promise.resolve();
+      if (!mounted) return;
+
+      try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const res = await axios.get('http://localhost:8085/api/order/get/revenue', { headers });
+        if (mounted && res.data) {
+          setRevenueData(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch revenue data:', err);
       }
     })();
 
@@ -1441,7 +1484,13 @@ export default function AdminDashboard() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {statsData.map((item, index) => (
+                {[{
+                  title: "Total Revenue",
+                  value: `LKR ${(revenueData.currentMonthTotal || 0).toLocaleString()}`,
+                  change: `+${(revenueData.percentageChange || 0).toFixed(1)}%`,
+                  isPositive: revenueData.percentageChange >= 0,
+                  icon: <ShoppingBag />,
+                }, ...statsData.slice(1)].map((item, index) => (
                   <StatsCard key={index} item={item} />
                 ))}
               </div>
