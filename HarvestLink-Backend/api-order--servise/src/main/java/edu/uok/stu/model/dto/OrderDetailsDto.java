@@ -13,8 +13,8 @@ import java.util.List;
 
 public class OrderDetailsDto {
 
-    String CustomerName;
-    String CustomerEmail;
+    String customerName;
+    String customerEmail;
     List<OrderItemsDto> orderItems;
     double deliveryFees;
     double totalPrice;
