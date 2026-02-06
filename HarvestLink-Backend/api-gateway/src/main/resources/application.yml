@@ -28,6 +28,14 @@ spring:
           filters:
             - AddResponseHeader=X-Response-Time, "Gateway"
 
+        - id: order-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/order/**
+          filters:
+            - AddResponseHeader=X-Response-Time, "Gateway"
+
+
 
   security:
     jwt:

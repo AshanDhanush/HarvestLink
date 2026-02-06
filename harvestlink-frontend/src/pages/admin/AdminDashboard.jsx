@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import api from "../../api/axios";
+import axios from 'axios';
 import authService from "../../services/authService";
 import {
   LayoutDashboard,
@@ -135,36 +136,6 @@ const topSellingProducts = [
   { name: "Red Onions", sales: "320kg", trend: "up" },
 ];
 
-const recentOrders = [
-  {
-    id: "#ORD-7752",
-    customer: "Green Leaf Restaurant",
-    items: "Tomatoes (50kg), Carrots (20kg)",
-    total: "LKR 24,500",
-    status: "Pending",
-  },
-  {
-    id: "#ORD-7751",
-    customer: "Colombo Fresh Market",
-    items: "Potatoes (100kg)",
-    total: "LKR 18,000",
-    status: "Delivered",
-  },
-  {
-    id: "#ORD-7750",
-    customer: "Sarah's Juice Bar",
-    items: "Mixed Fruits (30kg)",
-    total: "LKR 12,500",
-    status: "Processing",
-  },
-  {
-    id: "#ORD-7749",
-    customer: "Kandy Spice Hut",
-    items: "Green Chillies (10kg)",
-    total: "LKR 8,500",
-    status: "Delivered",
-  },
-];
 
 
 const initialFarmersData = [];
@@ -290,20 +261,26 @@ const StatsCard = ({ item }) => (
 );
 
 // 4. Recent Orders Table
-const RecentOrdersTable = () => {
+const RecentOrdersTable = ({ orders = [], onViewAll }) => {
   const getStatusColor = (status) => {
     switch (status) {
+      case "DELIVERED":
       case "Delivered": return "bg-green-100 text-green-700";
+      case "PENDING":
       case "Pending": return "bg-yellow-100 text-yellow-700";
+      case "PROCESSING":
       case "Processing": return "bg-blue-100 text-blue-700";
       default: return "bg-gray-100 text-gray-700";
     }
   };
+
+  const displayOrders = orders && orders.length > 0 ? orders.slice(0, 5) : [];
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden font-sans">
       <div className="p-6 border-b border-gray-100 flex justify-between items-center">
         <h2 className="text-lg font-bold text-gray-800">Recent Orders</h2>
-        <button className={`text-sm text-emerald-800 font-bold hover:underline`}>
+        <button onClick={() => onViewAll?.()} className={`text-sm text-emerald-800 font-bold hover:underline`}>
           View All
         </button>
       </div>
@@ -319,19 +296,25 @@ const RecentOrdersTable = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {recentOrders.map((order, index) => (
-              <tr key={index} className="hover:bg-gray-50 transition font-medium">
-                <td className="px-6 py-4 text-gray-800">{order.id}</td>
-                <td className="px-6 py-4 text-gray-600">{order.customer}</td>
-                <td className="px-6 py-4 text-gray-600 max-w-xs truncate">{order.items}</td>
-                <td className="px-6 py-4 text-gray-800">{order.total}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(order.status)}`}>
-                    {order.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {displayOrders.map((order) => {
+              const itemsDisplay = order.productNames && order.productNames.length > 0
+                ? order.productNames.map((name, i) => `${name} (${order.quantity?.[i] || 0})`).join(", ")
+                : order.items || "-";
+              
+              return (
+                <tr key={order.disID || order.id} className="hover:bg-gray-50 transition font-medium">
+                  <td className="px-6 py-4 text-gray-800">{order.disID || order.id || "-"}</td>
+                  <td className="px-6 py-4 text-gray-600">{order.customerName || order.customer || "N/A"}</td>
+                  <td className="px-6 py-4 text-gray-600 max-w-xs truncate">{itemsDisplay}</td>
+                  <td className="px-6 py-4 text-gray-800">LKR {order.totalPrice || order.total || "-"}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(order.status)}`}>
+                      {order.status || "PENDING"}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -856,7 +839,7 @@ const BusinessesCRUDSection = ({ businesses, onAddClick, onEditClick, onDeleteCl
     <div className="space-y-6 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 classNam="text-2xl font-bold text-gray-800">Businesses Management</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Businesses Management</h1>
           <p className="text-gray-500 text-sm font-medium">Manage registered businesses and partners.</p>
         </div>
         <button onClick={onAddClick} className={`flex items-center gap-2 text-white px-5 py-3 rounded-lg hover:bg-opacity-90 transition font-bold shadow-sm`} style={{ backgroundColor: colors.primaryDark }}>
@@ -989,6 +972,88 @@ const ProductsCRUDSection = ({ products, onAddClick, onEditClick, onDeleteClick 
   );
 };
 
+// 10. Orders CRUD Section
+const OrdersCRUDSection = ({ orders = [] }) => {
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "DELIVERED":
+      case "Delivered": return "bg-green-100 text-green-700";
+      case "PENDING":
+      case "Pending": return "bg-yellow-100 text-yellow-700";
+      case "PROCESSING":
+      case "Processing": return "bg-blue-100 text-blue-700";
+      default: return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  return (
+    <div className="space-y-6 font-sans">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Orders Management</h1>
+          <p className="text-gray-500 text-sm font-medium">View and manage all customer orders.</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-gray-50 text-gray-500 text-sm uppercase tracking-wider">
+              <tr>
+                <th className="px-6 py-4 font-bold">Order ID</th>
+                <th className="px-6 py-4 font-bold">Customer</th>
+                <th className="px-6 py-4 font-bold">Products</th>
+                <th className="px-6 py-4 font-bold">Quantity</th>
+                <th className="px-6 py-4 font-bold">Total Price</th>
+                <th className="px-6 py-4 font-bold">Delivery Fee</th>
+                <th className="px-6 py-4 font-bold">Delivery Address</th>
+                <th className="px-6 py-4 font-bold">Order Date</th>
+                <th className="px-6 py-4 font-bold">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 text-sm">
+              {orders.length > 0 ? (
+                orders.map((order) => (
+                  <tr key={order.disID || order.id} className="hover:bg-gray-50 transition font-medium">
+                    <td className="px-6 py-4 text-gray-600">#{order.disID}</td>
+                    <td className="px-6 py-4 text-gray-600">{order.customerName|| order.customer}</td>
+                    <td className="px-6 py-4 text-gray-800 max-w-xs">
+                      <div className="font-bold">{order.productNames?.join(", ") || "-"}</div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {order.quantity?.map((q) => `${q} unit`).join(", ") || "-"}
+                    </td>
+                    <td className="px-6 py-4 text-gray-800 font-bold">LKR {order.totalPrice || "-"}</td>
+                    <td className="px-6 py-4 text-gray-600">LKR {order.deliveryFees || "-"}</td>
+                    <td className="px-6 py-4 text-gray-600 max-w-xs truncate">
+                      <div className="flex items-center gap-2">
+                        <MapPin size={14} className="text-gray-400 flex-shrink-0" />
+                        {order.deliveryAddress || "-"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{order.date || "-"}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(order.status)}`}>
+                        {order.status || "PENDING"}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="9" className="px-6 py-8 text-center text-gray-500 font-medium">
+                    No orders found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- Main Layout Structure ---
 export default function AdminDashboard() {
   const [currentView, setCurrentView] = useState("overview");
@@ -1011,6 +1076,10 @@ export default function AdminDashboard() {
   const [productsError, setProductsError] = useState(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  // Orders state
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [ordersError, setOrdersError] = useState(null);
 
   // Fetch farmers from backend on mount
   useEffect(() => {
@@ -1113,6 +1182,34 @@ export default function AdminDashboard() {
         if (mounted) setProductsError(err.message || 'Failed to load products');
       } finally {
         if (mounted) setLoadingProducts(false);
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, []);
+
+  // Fetch orders from backend on mount
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      await Promise.resolve();
+      if (!mounted) return;
+      setLoadingOrders(true);
+      setOrdersError(null);
+
+      try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const res = await axios.get('http://localhost:8085/api/order/get/Orders', { headers });
+        if (mounted) setOrders(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error('Failed to fetch orders:', err);
+        if (mounted) setOrdersError(err.response?.data?.message || err.message || 'Failed to load orders');
+      } finally {
+        if (mounted) setLoadingOrders(false);
       }
     })();
 
@@ -1352,7 +1449,7 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left Column (Table) */}
                 <div className="lg:col-span-2">
-                  <RecentOrdersTable />
+                  <RecentOrdersTable orders={orders} onViewAll={() => setCurrentView('orders')} />
                 </div>
 
                 {/* Right Column (Widgets) */}
@@ -1421,6 +1518,19 @@ export default function AdminDashboard() {
                   onEditClick={handleEditProductClick}
                   onDeleteClick={handleDeleteProductClick}
                 />
+              )}
+            </>
+          )}
+
+          {/* === VIEW: ORDERS CRUD === */}
+          {currentView === "orders" && (
+            <>
+              {loadingOrders ? (
+                <div className="p-6 bg-white rounded-xl shadow-sm text-center">Loading orders...</div>
+              ) : ordersError ? (
+                <div className="p-6 bg-white rounded-xl shadow-sm text-center text-red-600">Error loading orders: {ordersError}</div>
+              ) : (
+                <OrdersCRUDSection orders={orders} />
               )}
             </>
           )}

@@ -1,9 +1,7 @@
 package edu.uok.stu.service.impl;
 
 
-import edu.uok.stu.model.dto.NotificationEvent;
-import edu.uok.stu.model.dto.OrderItemsDto;
-import edu.uok.stu.model.dto.OrderRequestDto;
+import edu.uok.stu.model.dto.*;
 import edu.uok.stu.model.entity.OrderDetails;
 import edu.uok.stu.model.entity.OrderEntity;
 import edu.uok.stu.repository.OrderDetailsRepository;
@@ -19,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -93,6 +92,41 @@ public class OrderServiceImpl implements OrderService {
         }catch (Exception e) {
             throw new RuntimeException("Failed to save order", e);
         }
+    }
+
+    @Override
+    public List<OrderResponse> getOrders() {
+        List<OrderDetails> orderDetails = orderDetailsRepository.findAll();
+        List<OrderResponse> orderResponses = new ArrayList<>();
+
+        for (OrderDetails o : orderDetails) {
+
+            List<String> productNames = o.getOrderItems().stream()
+                    .map(OrderItemsDto::getProductName)
+                    .toList();
+
+            List<Integer> quantities = o.getOrderItems().stream()
+                    .map(OrderItemsDto::getQuantity)
+                    .toList();
+
+
+            OrderResponse response = new OrderResponse(
+                    o.getDisID(),
+                    o.getCustomerName(),
+                    o.getCustomerEmail(),
+                    productNames,
+                    quantities,
+                    o.getDeliveryFees(),
+                    o.getTotalPrice(),
+                    o.getDeliveryAddress(),
+                    o.getStatus(),
+                    o.getDate().toString()
+            );
+
+            orderResponses.add(response);
+        }
+
+        return orderResponses;
     }
 
     private String generateTempId() {
