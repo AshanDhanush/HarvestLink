@@ -15,4 +15,6 @@ public interface AdminService {
     Object updateUser(UserDto userDto);
 
     Object deleteUser(String userEmail);
+
+    int getFarmersTotal();
 }

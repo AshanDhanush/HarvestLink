@@ -1,9 +1,7 @@
 package edu.uok.stu.service.impl;
 
 
-import edu.uok.stu.model.dto.NotificationEvent;
-import edu.uok.stu.model.dto.OrderItemsDto;
-import edu.uok.stu.model.dto.OrderRequestDto;
+import edu.uok.stu.model.dto.*;
 import edu.uok.stu.model.entity.OrderDetails;
 import edu.uok.stu.model.entity.OrderEntity;
 import edu.uok.stu.repository.OrderDetailsRepository;
@@ -19,7 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -94,6 +95,86 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Failed to save order", e);
         }
     }
+
+    @Override
+    public List<OrderResponse> getOrders() {
+        List<OrderDetails> orderDetails = orderDetailsRepository.findAll();
+        List<OrderResponse> orderResponses = new ArrayList<>();
+
+        for (OrderDetails o : orderDetails) {
+
+            List<String> productNames = o.getOrderItems().stream()
+                    .map(OrderItemsDto::getProductName)
+                    .toList();
+
+            List<Integer> quantities = o.getOrderItems().stream()
+                    .map(OrderItemsDto::getQuantity)
+                    .toList();
+
+
+            OrderResponse response = new OrderResponse(
+                    o.getDisID(),
+                    o.getCustomerName(),
+                    o.getCustomerEmail(),
+                    productNames,
+                    quantities,
+                    o.getDeliveryFees(),
+                    o.getTotalPrice(),
+                    o.getDeliveryAddress(),
+                    o.getStatus(),
+                    o.getDate().toString()
+            );
+
+            orderResponses.add(response);
+        }
+
+        return orderResponses;
+    }
+
+    @Override
+    public Map<String, Object> getMonthlyRevenueAnalytics() {
+        LocalDate now = LocalDate.now();
+
+
+        LocalDate startCurrentMonth = now.withDayOfMonth(1);
+        LocalDate endCurrentMonth = now.withDayOfMonth(now.lengthOfMonth());
+
+        LocalDate startLastMonth = now.minusMonths(1).withDayOfMonth(1);
+        LocalDate endLastMonth = now.minusMonths(1).withDayOfMonth(now.minusMonths(1).lengthOfMonth());
+
+
+        List<OrderDetails> currentMonthOrders = orderDetailsRepository.findByDateBetween(startCurrentMonth, endCurrentMonth);
+        List<OrderDetails> lastMonthOrders = orderDetailsRepository.findByDateBetween(startLastMonth, endLastMonth);
+
+
+        double currentMonthTotal = currentMonthOrders.stream()
+                .mapToDouble(OrderDetails::getTotalPrice)
+                .sum();
+
+        double lastMonthTotal = lastMonthOrders.stream()
+                .mapToDouble(OrderDetails::getTotalPrice)
+                .sum();
+
+
+        double percentageChange;
+        if (lastMonthTotal == 0) {
+            percentageChange = (currentMonthTotal > 0) ? 100.0 : 0.0;
+        } else {
+            percentageChange = ((currentMonthTotal - lastMonthTotal) / lastMonthTotal) * 100;
+        }
+
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("currentMonthTotal", currentMonthTotal);
+        response.put("lastMonthTotal", lastMonthTotal);
+        response.put("percentageChange", Math.round(percentageChange * 100.0) / 100.0);
+        System.out.println(currentMonthTotal);
+        System.out.println(lastMonthTotal);
+        System.out.println(percentageChange);
+
+        return response;
+    }
+
 
     private String generateTempId() {
         List<OrderDetails> orders = orderDetailsRepository.findAll();

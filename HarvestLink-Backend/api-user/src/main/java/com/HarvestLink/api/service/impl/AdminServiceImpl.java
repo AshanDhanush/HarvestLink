@@ -80,6 +80,16 @@ public class AdminServiceImpl implements AdminService {
         return "Delete Success";
     }
 
+    @Override
+    public int getFarmersTotal() {
+        List<User> users = userRepository.findByRole(Role.FARMER);
+        int total = 0 ;
+        for(int i = 0; i<= users.size()-1;i++){
+            total++;
+        }
+        return total;
+    }
+
 
     // Helper method to avoid duplicating mapping logic
     private UserDto mapToDto(User user) {
