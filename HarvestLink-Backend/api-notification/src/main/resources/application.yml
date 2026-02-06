@@ -5,6 +5,7 @@ spring:
   data:
     mongodb:
       uri: mongodb+srv://ashandhanushka:Mashi123@tablex.q2ab2lu.mongodb.net/TableX_db?retryWrites=true&w=majority
+
   mail:
     host: smtp.gmail.com
     port: 465
@@ -22,10 +23,24 @@ spring:
             class: javax.net.ssl.SSLSocketFactory
             port: 465
 
-  # IMPORTANT: This block prevents Spring from creating a default RabbitMQ connection
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: product-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: "*"
+        spring.json.type.mapping: notification:uok.stu.Harvestlink.model.dto.CreateNotificationRequest
 
 rabbitmq:
   enabled: false
