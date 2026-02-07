@@ -1,5 +1,6 @@
 package com.HarvestLink.api.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,11 +13,14 @@ import com.HarvestLink.api.model.entity.User;
 
 @Repository
 public interface UserRepository extends MongoRepository<User, String> {
-    Optional<User> findByEmail(String email);
 
-    List<User> findByRole(Role role);
+    Optional<User> findByEmail(String email);
 
     User getUsersByEmail(String email);
 
     void deleteByEmail(String userEmail);
+
+    List<User> findByRole(Role role);
+
+    List<User> findByCreatedDateBetween(LocalDate startDate, LocalDate endDate);
 }

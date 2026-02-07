@@ -1,5 +1,6 @@
 package com.HarvestLink.api.model.entity;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -32,6 +33,8 @@ public class User implements UserDetails {
     private String contactNo;
     private String address;
     private Role role;
+    private LocalDate createdDate;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

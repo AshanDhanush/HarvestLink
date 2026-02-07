@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +37,7 @@ public class AuthServiceImpl implements AuthService {
                 .contactNo(request.getContactNo())
                 .address(request.getAddress())
                 .role(request.getRole())
+                .createdDate(LocalDate.now())
                 .build();
 
         User savedUser = userRepository.save(user);
