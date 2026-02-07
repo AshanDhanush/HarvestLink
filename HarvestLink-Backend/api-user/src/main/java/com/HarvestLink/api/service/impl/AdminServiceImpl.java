@@ -8,7 +8,10 @@ import com.HarvestLink.api.util.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -81,13 +84,95 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public int getFarmersTotal() {
-        List<User> users = userRepository.findByRole(Role.FARMER);
-        int total = 0 ;
-        for(int i = 0; i<= users.size()-1;i++){
-            total++;
+    public Map<String,Object> getFarmersTotal() {
+       LocalDate now = LocalDate.now();
+
+       LocalDate startCurrentMonth = now.withDayOfMonth(1);
+       LocalDate endCurrentMonth  = now.withDayOfMonth(now.lengthOfMonth());
+
+       LocalDate startLastMonth = now.minusMonths(1).withDayOfMonth(1);
+       LocalDate endLastMonth = now.minusMonths(1).withDayOfMonth(now.minusMonths(1).lengthOfMonth());
+
+       List<User> currentMonthUsers = userRepository.findByCreatedDateBetween(startCurrentMonth,endCurrentMonth);
+       List<User> lasMonthUsers  = userRepository.findByCreatedDateBetween(startLastMonth,endLastMonth);
+
+       int countOfCurrentMonthFarmers = 0;
+       int lastMonthFarmers = 0;
+      for(User u : currentMonthUsers){
+          if(u.getRole().equals(Role.FARMER)){
+              countOfCurrentMonthFarmers++;
+          }
+      }
+
+
+        for(User u : lasMonthUsers){
+            if(u.getRole().equals(Role.FARMER)){
+                lastMonthFarmers++;
+            }
         }
-        return total;
+        double percentageChange;
+        if (lastMonthFarmers ==0){
+            percentageChange = (countOfCurrentMonthFarmers>0) ? 100.0 : 0.0;
+        } else {
+           percentageChange = ((double) (countOfCurrentMonthFarmers - lastMonthFarmers) / lastMonthFarmers) * 100 ;
+        }
+
+        List<User> allFarmers = userRepository.findByRole(Role.FARMER);
+        int allFarmersTotal = allFarmers.size();
+
+        Map<String,Object> response = new HashMap<>();
+        response.put("percentageChangeAccordingToMonth", Math.round(percentageChange*100.0)/100.0);
+        response.put("TotalFarmers",allFarmersTotal);
+
+        return response;
+
+    }
+
+    @Override
+    public Map<String, Object> getBusinessTotal() {
+        LocalDate now = LocalDate.now();
+
+        LocalDate startCurrentMonth = now.withDayOfMonth(1);
+        LocalDate endCurrentMonth  = now.withDayOfMonth(now.lengthOfMonth());
+
+        LocalDate startLastMonth = now.minusMonths(1).withDayOfMonth(1);
+        LocalDate endLastMonth = now.minusMonths(1).withDayOfMonth(now.minusMonths(1).lengthOfMonth());
+
+        List<User> currentMonthUsers = userRepository.findByCreatedDateBetween(startCurrentMonth,endCurrentMonth);
+        List<User> lasMonthUsers  = userRepository.findByCreatedDateBetween(startLastMonth,endLastMonth);
+
+        int countOfCurrentMonthBuyers = 0;
+        int lastMonthBuyers = 0;
+        for(User u : currentMonthUsers){
+            if(u.getRole().equals(Role.BUYER)){
+                countOfCurrentMonthBuyers++;
+            }
+        }
+
+
+        for(User u : lasMonthUsers){
+            if(u.getRole().equals(Role.BUYER)){
+                lastMonthBuyers++;
+            }
+        }
+        double percentageChange;
+        if (lastMonthBuyers ==0){
+            percentageChange = (countOfCurrentMonthBuyers>0) ? 100.0 : 0.0;
+        } else {
+            percentageChange = ((double) (countOfCurrentMonthBuyers - lastMonthBuyers) / lastMonthBuyers) * 100 ;
+        }
+
+        List<User> allFarmers = userRepository.findByRole(Role.BUYER);
+        int allBuyersTotal = allFarmers.size();
+
+        Map<String,Object> response = new HashMap<>();
+        response.put("percentageChangeAccordingToMonth", Math.round(percentageChange*100.0)/100.0);
+        response.put("TotalBuyers",allBuyersTotal);
+        System.out.println(percentageChange);
+        System.out.println(allBuyersTotal);
+
+        return response;
+
     }
 
 

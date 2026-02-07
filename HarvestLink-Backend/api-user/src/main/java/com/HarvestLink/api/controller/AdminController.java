@@ -7,12 +7,12 @@ import com.HarvestLink.api.service.AdminProductProducerService;
 import com.HarvestLink.api.service.AdminService;
 import com.HarvestLink.api.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -72,8 +72,13 @@ public class AdminController {
         return ResponseEntity.ok(adminProductProducerService.deleteProduct(id));
     }
     @GetMapping("get/farmers/total")
-    public int getFarmersTotal(){
+    public Map<String,Object> getFarmersTotal(){
         return adminService.getFarmersTotal();
+    }
+
+    @GetMapping("get/business/total")
+    public Map<String,Object> getBusinessTotal(){
+        return adminService.getBusinessTotal();
     }
 
 

@@ -175,6 +175,11 @@ public class OrderServiceImpl implements OrderService {
         return response;
     }
 
+    @Override
+    public List<TopSellingProductDto> getTopSellingProducts() {
+        return orderDetailsRepository.findTopSellingProduct();
+    }
+
 
     private String generateTempId() {
         List<OrderDetails> orders = orderDetailsRepository.findAll();
@@ -217,6 +222,7 @@ public class OrderServiceImpl implements OrderService {
 
         return orderDetails;
     }
+
 
 
 }

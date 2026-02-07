@@ -1,6 +1,7 @@
 package com.HarvestLink.api.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.HarvestLink.api.model.dto.UserDto;
 
@@ -16,5 +17,7 @@ public interface AdminService {
 
     Object deleteUser(String userEmail);
 
-    int getFarmersTotal();
+    Map<String,Object> getFarmersTotal();
+
+    Map<String, Object> getBusinessTotal();
 }

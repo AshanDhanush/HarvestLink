@@ -97,44 +97,9 @@ const displayBusinessId = (id) => {
   return s;
 };
 
-// --- Mock Data (Overview) ---
-const statsData = [
-  {
-    title: "Total Revenue",
-    value: "LKR 450,000",
-    change: "+12.5%",
-    isPositive: true,
-    icon: <ShoppingBag />,
-  },
-  {
-    title: "Active Farmers",
-    value: "124",
-    change: "+4.3%",
-    isPositive: true,
-    icon: <Users />,
-  },
-  {
-    title: "Active Businesses",
-    value: "58",
-    change: "+2.1%",
-    isPositive: true,
-    icon: <Users />,
-  },
-  {
-    title: "Pending Orders",
-    value: "32",
-    change: "-5.0%",
-    isPositive: false,
-    icon: <Package />,
-  }
-];
+// No mock data - all data will be fetched from APIs
 
-const topSellingProducts = [
-  { name: "Organic Tomatoes", sales: "1,200kg", trend: "up" },
-  { name: "Fresh Potatoes", sales: "950kg", trend: "up" },
-  { name: "Green Chillies", sales: "400kg", trend: "down" },
-  { name: "Red Onions", sales: "320kg", trend: "up" },
-];
+
 
 
 
@@ -205,36 +170,141 @@ const Sidebar = ({ currentView, setCurrentView }) => {
 };
 
 
-const Header = () => (
-  <header className="h-16 bg-white shadow-sm fixed top-0 right-0 left-64 z-10 flex items-center justify-between px-6 transition-all duration-300 font-sans">
-    <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 w-96">
-      <Search size={18} className="text-gray-400" />
-      <input
-        type="text"
-        placeholder="Search anything..."
-        className="bg-transparent border-none outline-none text-sm ml-2 flex-1 placeholder-gray-400 font-sans"
-      />
-    </div>
+// Toast Notification Component
+const ToastNotification = ({ notification, onClose }) => {
+  const [isVisible, setIsVisible] = useState(true);
 
+  useEffect(() => {
+    if (notification) {
+      setIsVisible(true);
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        onClose();
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification, onClose]);
+
+  if (!notification || !isVisible) return null;
+
+  return (
+    <div className={`fixed top-6 right-6 p-4 rounded-lg shadow-lg border-l-4 font-sans z-[100] animate-fade-in ${
+      notification.type === 'success'
+        ? 'bg-green-50 border-green-500 text-green-800'
+        : 'bg-blue-50 border-blue-500 text-blue-800'
+    }`}>
+      <div className="flex items-center gap-3">
+        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
+          notification.type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+        }`}>
+          <span className="text-white text-sm font-bold">✓</span>
+        </div>
+        <span className="font-medium text-sm">{notification.message}</span>
+      </div>
+    </div>
+  );
+};
+
+const NotificationPanel = ({ isOpen, notifications, onClose }) => {
+  if (!isOpen) return null;
+  
+  return (
+    <div className="absolute right-6 top-16 w-80 bg-white rounded-xl shadow-lg border border-gray-100 max-h-96 overflow-y-auto z-50">
+      <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+        <h3 className="font-bold text-gray-800">Notifications</h3>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <X size={18} />
+        </button>
+      </div>
+      {notifications.length === 0 ? (
+        <div className="p-8 text-center text-gray-500 text-sm">
+          <p>No notifications yet</p>
+        </div>
+      ) : (
+        <div>
+          {notifications.map((notif, idx) => (
+            <div key={idx} className="p-4 border-b border-gray-50 hover:bg-gray-50 transition">
+              <div className="flex items-start gap-3">
+                <div className="h-2 w-2 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-800">{notif.message}</p>
+                  <p className="text-xs text-gray-400 mt-1">{notif.time}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const Header = ({ admin = {}, isProfileOpen, setIsProfileOpen, isNotificationPanelOpen, setIsNotificationPanelOpen, notifications, notificationCount }) => (
+  <header className="h-16 bg-white shadow-sm fixed top-0 right-0 left-64 z-10 flex items-center justify-end px-6 transition-all duration-300 font-sans">
     <div className="flex items-center gap-6">
-      <div className="relative cursor-pointer">
+      <div className="relative">
+        <button
+          onClick={() => setIsNotificationPanelOpen(!isNotificationPanelOpen)}
+          className="cursor-pointer relative group"
+        >
           <Bell size={20} className="text-gray-600 hover:text-emerald-800 transition" />
-        <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+          {notificationCount > 0 && (
+            <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full border-2 border-white flex items-center justify-center text-xs text-white font-bold">
+              {notificationCount}
+            </span>
+          )}
+        </button>
+        <NotificationPanel
+          isOpen={isNotificationPanelOpen}
+          notifications={notifications}
+          onClose={() => setIsNotificationPanelOpen(false)}
+        />
       </div>
 
-      <div className="flex items-center gap-3 cursor-pointer group">
-        <img
-          src="https://i.pravatar.cc/150?img=68"
-          alt="Admin Profile"
-           className={`h-9 w-9 rounded-full border-2 border-gray-200 group-hover:border-lime-400 transition`}
-        />
-        <div className="hidden md:block text-sm text-left font-sans">
-          <p className="font-bold text-gray-700 group-hover:text-emerald-800">
-            Admin User
-          </p>
-          <p className="text-gray-400 text-xs font-medium">Super Admin</p>
+      <div className="relative">
+        <div 
+          className="flex items-center gap-3 cursor-pointer group"
+          onClick={() => setIsProfileOpen(!isProfileOpen)}
+        >
+          <img
+            src="https://i.pravatar.cc/150?img=68"
+            alt="Admin Profile"
+             className={`h-9 w-9 rounded-full border-2 border-gray-200 group-hover:border-lime-400 transition`}
+          />
+          <div className="hidden md:block text-sm text-left font-sans">
+            <p className="font-bold text-gray-700 group-hover:text-emerald-800">
+              {admin.name || 'Admin User'}
+            </p>
+            <p className="text-gray-400 text-xs font-medium">{admin.role || 'Super Admin'}</p>
+          </div>
+          <ChevronDown size={16} className={`text-gray-400 group-hover:text-emerald-800 transition transform ${isProfileOpen ? 'rotate-180' : ''}`} />
         </div>
-        <ChevronDown size={16} className="text-gray-400 group-hover:text-emerald-800" />
+
+        {/* Profile Dropdown */}
+        {isProfileOpen && (
+          <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-gray-100 p-4 z-50">
+            {/* Profile Header */}
+            <div className="flex items-center gap-4 pb-4 border-b border-gray-100">
+              <img
+                src="https://i.pravatar.cc/150?img=68"
+                alt="Admin Profile"
+                className="h-14 w-14 rounded-full border-2 border-gray-200"
+              />
+              <div className="flex-1">
+                <p className="font-bold text-gray-800 text-sm">{admin.name || 'Admin User'}</p>
+                <p className="text-gray-500 text-xs mb-1">{admin.email || 'admin@harvestlink.com'}</p>
+              </div>
+            </div>
+
+            {/* Logout Button */}
+            <div className="pt-3">
+              <button className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition font-medium flex items-center gap-2">
+                <LogOut size={16} />
+                Logout
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   </header>
@@ -323,28 +393,28 @@ const RecentOrdersTable = ({ orders = [], onViewAll }) => {
 };
 
 // 5. Top Products Widget
-const TopProductsWidget = () => (
+const TopProductsWidget = ({ products = [] }) => (
   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 font-sans">
     <h2 className="text-lg font-bold text-gray-800 mb-4">Top Selling Produce</h2>
     <div className="space-y-4">
-      {topSellingProducts.map((product, i) => (
-        <div key={i} className="flex items-center justify-between border-b border-gray-50 pb-3 last:border-0 last:pb-0">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
-              <Leaf size={18} className={`text-emerald-800`} />
+      {products && products.length > 0 ? (
+        products.map((product, i) => (
+          <div key={product.productId || i} className="flex items-center justify-between border-b border-gray-50 pb-3 last:border-0 last:pb-0">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                <Leaf size={18} className={`text-emerald-800`} />
+              </div>
+              <div>
+                <p className="font-bold text-gray-800 text-sm">{product.productName}</p>
+                <p className="text-xs text-gray-400 font-medium">{product.totalSold} sold</p>
+              </div>
             </div>
-            <div>
-              <p className="font-bold text-gray-800 text-sm">{product.name}</p>
-              <p className="text-xs text-gray-400 font-medium">{product.sales} sold</p>
-            </div>
-          </div>
-          {product.trend === "up" ? (
             <ArrowUpRight size={16} className="text-green-500" />
-          ) : (
-            <ArrowDownRight size={16} className="text-red-500" />
-          )}
-        </div>
-      ))}
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-500 text-sm">No products available</p>
+      )}
     </div>
   </div>
 );
@@ -1054,9 +1124,144 @@ const OrdersCRUDSection = ({ orders = [] }) => {
   );
 };
 
+// 15. Settings Component
+const SettingsView = ({ admin, setAdmin }) => {
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [savingMessage, setSavingMessage] = React.useState('');
+
+  const handleSaveChanges = async () => {
+    try {
+      setIsSaving(true);
+      setSavingMessage('');
+
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      };
+
+      const payload = {
+        name: admin.name,
+        email: admin.email,
+        role: 'ADMIN',
+      };
+
+      const res = await fetch('http://localhost:8085/api/v1/admin/user/update', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      
+      setSavingMessage('Profile updated successfully!');
+      console.log('Profile Update Response:', data);
+      
+      setTimeout(() => setSavingMessage(''), 3000);
+    } catch (err) {
+      console.error('Failed to save profile:', err);
+      setSavingMessage(`Error: ${err.message}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6 font-sans">
+      {/* Profile Settings */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Profile Settings</h2>
+        
+        <div className="max-w-2xl space-y-6">
+          {/* Profile Picture */}
+          <div className="flex items-center gap-4">
+            <img
+              src="https://i.pravatar.cc/150?img=68"
+              alt="Profile"
+              className="h-20 w-20 rounded-full border-2 border-gray-200"
+            />
+            <div>
+              <button className="px-4 py-2 bg-emerald-800 text-white rounded-lg hover:bg-emerald-900 transition font-medium text-sm">
+                Change Avatar
+              </button>
+              <p className="text-gray-500 text-xs mt-2">Recommended size: 200x200px</p>
+            </div>
+          </div>
+
+          <hr className="border-gray-100" />
+
+          {/* Personal Information */}
+          <div>
+            <label className="block text-sm font-bold text-gray-800 mb-2">Full Name</label>
+            <input
+              type="text"
+              value={admin.name || ''}
+              onChange={(e) => setAdmin({ ...admin, name: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-emerald-800"
+              placeholder="Enter your full name"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-800 mb-2">Email Address</label>
+            <input
+              type="email"
+              value={admin.email || ''}
+              onChange={(e) => setAdmin({ ...admin, email: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-emerald-800"
+              placeholder="Enter your email"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-800 mb-2">Role</label>
+            <input
+              type="text"
+              value={admin.role || ''}
+              disabled
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+            />
+            <p className="text-gray-500 text-xs mt-2">Your role cannot be changed</p>
+          </div>
+
+          <hr className="border-gray-100" />
+
+          {/* Save Status Message */}
+          {savingMessage && (
+            <div className={`p-3 rounded-lg ${savingMessage.includes('Error') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
+              {savingMessage}
+            </div>
+          )}
+
+          {/* Save Buttons */}
+          <div className="flex gap-4 pt-6">
+            <button
+              onClick={handleSaveChanges}
+              disabled={isSaving}
+              className="px-6 py-2 bg-emerald-800 text-white rounded-lg hover:bg-emerald-900 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </button>
+            <button className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- Main Layout Structure ---
 export default function AdminDashboard() {
   const [currentView, setCurrentView] = useState("overview");
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [admin, setAdmin] = useState({
+    name: 'Admin User',
+    role: 'Super Admin',
+    email: 'admin@harvestlink.com'
+  });
 
   // === CRUD State Management ===
   const [farmers, setFarmers] = useState(initialFarmersData);
@@ -1086,6 +1291,30 @@ export default function AdminDashboard() {
     lastMonthTotal: 400000,
     percentageChange: 12.5,
   });
+  // Total Farmers state
+  const [totalFarmersData, setTotalFarmersData] = useState({
+    TotalFarmers: 124,
+    percentageChangeAccordingToMonth: 4.3,
+  });
+  // Total Businesses state
+  const [totalBusinessesData, setTotalBusinessesData] = useState({
+    TotalBusinesses: 58,
+    percentageChangeAccordingToMonth: 2.1,
+  });
+  // Pending Orders state
+  const [pendingOrdersData, setPendingOrdersData] = useState({
+    PendingOrders: 32,
+    percentageChangeAccordingToMonth: -5.0,
+  });
+  // Top Selling Products state
+  const [topSellingProducts, setTopSellingProducts] = useState([]);
+  // Notification state
+  const [notification, setNotification] = useState(null);
+  const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  // Previous values for change detection
+  const [previousFarmersCount, setPreviousFarmersCount] = useState(124);
+  const [previousBusinessesCount, setPreviousBusinessesCount] = useState(58);
 
   // Fetch farmers from backend on mount
   useEffect(() => {
@@ -1258,6 +1487,214 @@ export default function AdminDashboard() {
 
     return () => { mounted = false; };
   }, []);
+
+  // Fetch total farmers data - called on mount and via polling
+  const fetchTotalFarmers = async () => {
+    try {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const res = await fetch('http://localhost:8085/api/v1/admin/get/farmers/total', {
+        method: 'GET',
+        headers,
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      console.log('Total Farmers API Response:', data);
+      if (data) {
+        setTotalFarmersData({
+          TotalFarmers: data.TotalFarmers ,
+          percentageChangeAccordingToMonth: data.percentageChangeAccordingToMonth ,
+        });
+        console.log('TotalFarmersData State Updated:', { TotalFarmers: data.TotalFarmers, percentageChangeAccordingToMonth: data.percentageChangeAccordingToMonth });
+      }
+    } catch (err) {
+      console.error('Failed to fetch total farmers data:', err);
+    }
+  };
+
+  // Fetch total businesses data - called on mount and via polling
+  const fetchTotalBusinesses = async () => {
+    try {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const res = await fetch('http://localhost:8085/api/v1/admin/get/business/total', {
+        method: 'GET',
+        headers,
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      console.log('Total Businesses API Response:', data);
+      if (data) {
+        setTotalBusinessesData({
+          TotalBusinesses: data.TotalBuyers || data.TotalBusinesses || 58,
+          percentageChangeAccordingToMonth: data.percentageChangeAccordingToMonth,
+        });
+        console.log('TotalBusinessesData State Updated:', { TotalBusinesses: data.TotalBuyers || data.TotalBusinesses, percentageChangeAccordingToMonth: data.percentageChangeAccordingToMonth });
+      }
+    } catch (err) {
+      console.error('Failed to fetch total businesses data:', err);
+    }
+  };
+
+  // Fetch total farmers data from backend on mount and poll every 3 seconds
+  useEffect(() => {
+    fetchTotalFarmers(); // Fetch on mount
+    const interval = setInterval(fetchTotalFarmers, 3000); // Poll every 3 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch total businesses data from backend on mount and poll every 3 seconds
+  useEffect(() => {
+    fetchTotalBusinesses(); // Fetch on mount
+    const interval = setInterval(fetchTotalBusinesses, 3000); // Poll every 3 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch pending orders data from backend on mount
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      await Promise.resolve();
+      if (!mounted) return;
+
+      try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const res = await fetch('http://localhost:8080/api/v1/admin/get/orders/pending', {
+          method: 'GET',
+          headers,
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        console.log('Pending Orders API Response:', data);
+        if (mounted && data) {
+          setPendingOrdersData({
+            PendingOrders: data.PendingOrders || 32,
+            percentageChangeAccordingToMonth: data.percentageChangeAccordingToMonth || -5.0,
+          });
+          console.log('PendingOrdersData State Updated:', { PendingOrders: data.PendingOrders, percentageChangeAccordingToMonth: data.percentageChangeAccordingToMonth });
+        }
+      } catch (err) {
+        console.error('Failed to fetch pending orders data:', err);
+        // Keep default values on error
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, []);
+
+  // Fetch top selling products from backend on mount
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      await Promise.resolve();
+      if (!mounted) return;
+
+      try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const res = await fetch('http://localhost:8085/api/order/get/topsellingproducts', {
+          method: 'GET',
+          headers,
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        console.log('Top Selling Products API Response:', data);
+        console.log('Response Type:', typeof data);
+        console.log('Is Array:', Array.isArray(data));
+        
+        if (mounted) {
+          let productsArray = [];
+          
+          // Handle if response is a direct array
+          if (Array.isArray(data)) {
+            productsArray = data;
+          }
+          // Handle if response is an object with products/data property
+          else if (data && typeof data === 'object') {
+            if (Array.isArray(data.products)) {
+              productsArray = data.products;
+            } else if (Array.isArray(data.data)) {
+              productsArray = data.data;
+            } else if (Array.isArray(data.topSellingProducts)) {
+              productsArray = data.topSellingProducts;
+            }
+          }
+          
+          console.log('Products Array to Set:', productsArray);
+          setTopSellingProducts(productsArray);
+          console.log('TopSellingProducts State Updated with', productsArray.length, 'items');
+        }
+      } catch (err) {
+        console.error('Failed to fetch top selling products:', err);
+    
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, []);
+
+  // Track farmers count increase
+  useEffect(() => {
+    if (totalFarmersData) {
+      const currentCount = totalFarmersData.TotalFarmers || 0;
+      console.log('Farmers Check:', { currentCount, previousFarmersCount, shouldNotify: currentCount > previousFarmersCount });
+      if (currentCount > previousFarmersCount && previousFarmersCount > 0) {
+        console.log('Showing farmer notification');
+        const message = `New farmer is added! Total farmers: ${currentCount}`;
+        setNotification({
+          type: 'success',
+          message: message,
+        });
+        // Add to notifications array
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString();
+        setNotifications(prev => [{ message, time: timeStr }, ...prev]);
+        setPreviousFarmersCount(currentCount);
+      } else if (previousFarmersCount === 124 && currentCount !== 124) {
+        // First load, just update the count without showing notification
+        setPreviousFarmersCount(currentCount);
+      }
+    }
+  }, [totalFarmersData?.TotalFarmers, previousFarmersCount]);
+
+  // Track businesses count increase
+  useEffect(() => {
+    if (totalBusinessesData) {
+      const currentCount = totalBusinessesData.TotalBusinesses || 0;
+      console.log('Businesses Check:', { currentCount, previousBusinessesCount, shouldNotify: currentCount > previousBusinessesCount });
+      if (currentCount > previousBusinessesCount && previousBusinessesCount > 0) {
+        console.log('Showing business notification');
+        const message = `New buyer is added! Total buyers: ${currentCount}`;
+        setNotification({
+          type: 'success',
+          message: message,
+        });
+        // Add to notifications array
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString();
+        setNotifications(prev => [{ message, time: timeStr }, ...prev]);
+        setPreviousBusinessesCount(currentCount);
+      } else if (previousBusinessesCount === 58 && currentCount !== 58) {
+        // First load, just update the count without showing notification
+        setPreviousBusinessesCount(currentCount);
+      }
+    }
+  }, [totalBusinessesData?.TotalBusinesses, previousBusinessesCount]);
 
   // === CRUD Handlers ===
   const handleDeleteClick = async (email) => {
@@ -1468,11 +1905,21 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="flex h-screen font-sans" style={{ backgroundColor: colors.bgLight }}>
+    <>
+      <ToastNotification notification={notification} onClose={() => setNotification(null)} />
+      <div className="flex h-screen font-sans" style={{ backgroundColor: colors.bgLight }}>
       <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
 
       <div className="flex-1 flex flex-col ml-64 transition-all duration-300">
-        <Header />
+        <Header
+          admin={admin}
+          isProfileOpen={isProfileOpen}
+          setIsProfileOpen={setIsProfileOpen}
+          isNotificationPanelOpen={isNotificationPanelOpen}
+          setIsNotificationPanelOpen={setIsNotificationPanelOpen}
+          notifications={notifications}
+          notificationCount={notifications.length}
+        />
 
         <main className="flex-1 overflow-y-auto mt-16 p-6 z-0 font-sans">
           {/* === VIEW: OVERVIEW === */}
@@ -1486,11 +1933,29 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {[{
                   title: "Total Revenue",
-                  value: `LKR ${(revenueData.currentMonthTotal || 0).toLocaleString()}`,
-                  change: `+${(revenueData.percentageChange || 0).toFixed(1)}%`,
-                  isPositive: revenueData.percentageChange >= 0,
+                  value: `LKR ${(revenueData?.currentMonthTotal ?? 0).toLocaleString()}`,
+                  change: `${revenueData?.percentageChange >= 0 ? '+' : ''}${(revenueData?.percentageChange ?? 0).toFixed(2)}%`,
+                  isPositive: (revenueData?.percentageChange ?? 0) >= 0,
                   icon: <ShoppingBag />,
-                }, ...statsData.slice(1)].map((item, index) => (
+                }, {
+                  title: "Active Farmers",
+                  value: `${totalFarmersData?.TotalFarmers ?? 0}`,
+                  change: `${(totalFarmersData?.percentageChangeAccordingToMonth ?? 0) >= 0 ? '+' : ''}${(totalFarmersData?.percentageChangeAccordingToMonth ?? 0).toFixed(2)}%`,
+                  isPositive: (totalFarmersData?.percentageChangeAccordingToMonth ?? 0) >= 0,
+                  icon: <Users />,
+                }, {
+                  title: "Active Businesses",
+                  value: `${totalBusinessesData?.TotalBusinesses ?? 0}`,
+                  change: `${(totalBusinessesData?.percentageChangeAccordingToMonth ?? 0) >= 0 ? '+' : ''}${(totalBusinessesData?.percentageChangeAccordingToMonth ?? 0).toFixed(2)}%`,
+                  isPositive: (totalBusinessesData?.percentageChangeAccordingToMonth ?? 0) >= 0,
+                  icon: <Users />,
+                }, {
+                 title: "Pending Orders",
+                 value: `${pendingOrdersData?.PendingOrders ?? 0}`,
+                 change: `${(pendingOrdersData?.percentageChangeAccordingToMonth ?? 0) >= 0 ? '+' : ''}${(pendingOrdersData?.percentageChangeAccordingToMonth ?? 0).toFixed(2)}%`,
+                 isPositive: (pendingOrdersData?.percentageChangeAccordingToMonth ?? 0) >= 0,
+                 icon: <Package />,
+                }].map((item, index) => (
                   <StatsCard key={index} item={item} />
                 ))}
               </div>
@@ -1504,7 +1969,7 @@ export default function AdminDashboard() {
                 {/* Right Column (Widgets) */}
                 <div className="flex flex-col gap-6">
                   {/* Top Products Widget */}
-                  <TopProductsWidget />
+                  <TopProductsWidget products={topSellingProducts} />
 
                   {/* Promo/Help Card */}
                   <div className="rounded-xl p-6 text-white relative overflow-hidden" style={{ backgroundColor: colors.primaryDark }}>
@@ -1583,6 +2048,11 @@ export default function AdminDashboard() {
               )}
             </>
           )}
+
+          {/* === VIEW: SETTINGS === */}
+          {currentView === "settings" && (
+            <SettingsView admin={admin} setAdmin={setAdmin} />
+          )}
         </main>
       </div>
 
@@ -1604,5 +2074,6 @@ export default function AdminDashboard() {
         />
       )}
     </div>
+    </>
   );
 }
