@@ -8,6 +8,8 @@ import ContactSection from "../../components/home/ContactSection";
 import FAQSection from "../../components/contact/FAQSection";
 import TrendSection from "../../components/home/TrendSection";
 
+
+
 const Home = () => {
   return (
     <>
