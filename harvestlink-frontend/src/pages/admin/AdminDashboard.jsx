@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import axios from 'axios';
 import authService from "../../services/authService";
@@ -112,7 +113,7 @@ const initialBusinessesData = [];
 // === Components ===
 
 // 1. Sidebar Component
-const Sidebar = ({ currentView, setCurrentView }) => {
+const Sidebar = ({ currentView, setCurrentView, onLogout }) => {
   const navItems = [
     { id: "overview", icon: <LayoutDashboard size={20} />, label: "Overview" },
     { id: "farmers", icon: <Users size={20} />, label: "Farmers" },
@@ -160,6 +161,7 @@ const Sidebar = ({ currentView, setCurrentView }) => {
       {/* Logout Button */}
       <div className="p-4 border-t border-[#ffffff20]">
         <button
+          onClick={onLogout}
           className="flex items-center gap-3 px-4 py-3 rounded-lg w-full hover:bg-green-400 hover:text-green-700 transition-colors font-medium"
           style={{ color: colors.primaryDark }}
         >
@@ -241,7 +243,7 @@ const NotificationPanel = ({ isOpen, notifications, onClose }) => {
   );
 };
 
-const Header = ({ admin = {}, isProfileOpen, setIsProfileOpen, isNotificationPanelOpen, setIsNotificationPanelOpen, notifications, notificationCount }) => (
+const Header = ({ admin = {}, isProfileOpen, setIsProfileOpen, isNotificationPanelOpen, setIsNotificationPanelOpen, notifications, notificationCount, onLogout }) => (
   <header className="h-16 bg-white shadow-sm fixed top-0 right-0 left-64 z-10 flex items-center justify-end px-6 transition-all duration-300 font-sans">
     <div className="flex items-center gap-6">
       <div className="relative">
@@ -271,7 +273,7 @@ const Header = ({ admin = {}, isProfileOpen, setIsProfileOpen, isNotificationPan
           <img
             src="https://i.pravatar.cc/150?img=68"
             alt="Admin Profile"
-             className={`h-9 w-9 rounded-full border-2 border-gray-200 group-hover:border-lime-400 transition`}
+            className={`h-9 w-9 rounded-full border-2 border-gray-200 group-hover:border-lime-400 transition`}
           />
           <div className="hidden md:block text-sm text-left font-sans">
             <p className="font-bold text-gray-700 group-hover:text-emerald-800">
@@ -300,7 +302,10 @@ const Header = ({ admin = {}, isProfileOpen, setIsProfileOpen, isNotificationPan
 
             {/* Logout Button */}
             <div className="pt-3">
-              <button className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition font-medium flex items-center gap-2">
+              <button 
+                onClick={onLogout}
+                className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition font-medium flex items-center gap-2"
+              >
                 <LogOut size={16} />
                 Logout
               </button>
@@ -1257,6 +1262,7 @@ const SettingsView = ({ admin, setAdmin }) => {
 
 // --- Main Layout Structure ---
 export default function AdminDashboard() {
+  const navigate = useNavigate(); // Hook for navigation
   const [currentView, setCurrentView] = useState("overview");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [admin, setAdmin] = useState({
@@ -1264,6 +1270,11 @@ export default function AdminDashboard() {
     role: 'Super Admin',
     email: 'admin@harvestlink.com'
   });
+
+  const handleLogout = () => {
+    authService.logout();
+    navigate('/login');
+  };
 
   // === CRUD State Management ===
   const [farmers, setFarmers] = useState(initialFarmersData);
@@ -1871,7 +1882,7 @@ export default function AdminDashboard() {
     <>
       <ToastNotification notification={notification} onClose={() => setNotification(null)} />
       <div className="flex h-screen font-sans" style={{ backgroundColor: colors.bgLight }}>
-      <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
+      <Sidebar currentView={currentView} setCurrentView={setCurrentView} onLogout={handleLogout} />
 
       <div className="flex-1 flex flex-col ml-64 transition-all duration-300">
         <Header
@@ -1882,6 +1893,7 @@ export default function AdminDashboard() {
           setIsNotificationPanelOpen={setIsNotificationPanelOpen}
           notifications={notifications}
           notificationCount={notifications.length}
+          onLogout={handleLogout}
         />
 
         <main className="flex-1 overflow-y-auto mt-16 p-6 z-0 font-sans">
