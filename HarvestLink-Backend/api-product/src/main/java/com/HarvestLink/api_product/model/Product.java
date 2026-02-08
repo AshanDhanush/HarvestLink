@@ -17,7 +17,13 @@ public class Product {
     private String id;
     private String tempID;
     private String name;
+    private String category;
+    private String farmerName;
+    private String location;
+    private String imageUrl;
     private String description;
     private BigDecimal price;
     private Integer quantity;
+    private java.time.LocalDate dateAdded;
+    private java.time.LocalDate expiryDate;
 }

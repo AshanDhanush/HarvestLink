@@ -21,12 +21,29 @@
         <module name="Harvestlink" />
         <module name="api-product" />
       </profile>
-      <profile name="Annotation profile for api" enabled="true">
+      <profile name="Annotation profile for Harvestlink" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
+        </processorPath>
+        <module name="Harvestlink (2)" />
+        <module name="Harvestlink (1)" />
+      </profile>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="Notification-service" />
+        <module name="api-order--servise" />
+        <module name="api-gateway1" />
+      </profile>
+      <profile name="Annotation profile for api" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
         </processorPath>
         <module name="api" />
@@ -36,6 +53,8 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="Harvestlink" options="-parameters" />
+      <module name="Harvestlink (1)" options="-parameters" />
+      <module name="Harvestlink (2)" options="-parameters" />
       <module name="Notification-service" options="-parameters" />
       <module name="api" options="-parameters" />
       <module name="api-gateway1" options="-parameters" />
