@@ -27,7 +27,7 @@ const Contact = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-2">Call Us</h3>
                 <p className="text-gray-500 mb-1">Mon-Fri from 8am to 5pm</p>
-                <a href="tel:+15550000000" className="text-harvest-dark font-semibold text-lg hover:text-harvest-primary transition">+1 (555) 000-0000</a>
+                <a href="tel:+94 71 2345678" className="text-harvest-dark font-semibold text-lg hover:text-harvest-primary transition">+94 71 2345678</a>
             </div>
 
             <div className="bg-white p-6 rounded-2xl shadow-lg shadow-gray-100 flex flex-col items-center text-center border border-gray-100 hover:border-harvest-primary/30 transition duration-300">
@@ -45,7 +45,7 @@ const Contact = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-2">Visit Us</h3>
                 <p className="text-gray-500 mb-1">Come say hello at our office</p>
-                <span className="text-harvest-dark font-semibold text-lg">123 Farm Lane, Countryside</span>
+                <span className="text-harvest-dark font-semibold text-lg">123 Farm Lane, Colombo 07</span>
             </div>
           </div>
 

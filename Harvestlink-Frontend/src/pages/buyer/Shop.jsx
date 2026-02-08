@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import PageHeader from "../../components/layout/PageHeader";
 import TopBar from "../../components/layout/Topbar";
-import NavBar from "../../components/layout/Navbar";
+import NavBar from "../../components/layout/NavBar";
 import Footer from "../../components/layout/Footer";
 import ProductCard from "../../components/common/ProductCard";
 // 1. Import the AI Component 👇
@@ -37,27 +38,75 @@ const MapPlaceholder = () => (
 import productService from "../../services/productService";
 
 const Shop = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [allProducts, setAllProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const data = await productService.getAllProducts();
-        setProducts(data);
-      } catch (error) {
-        console.error("Failed to fetch products", error);
-      } finally {
-        setLoading(false);
-      }
+    // Local state for filter inputs
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("All Categories");
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const data = await productService.getAllProducts();
+                setAllProducts(data);
+                setFilteredProducts(data);
+            } catch (error) {
+                console.error("Failed to fetch products", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProducts();
+    }, []);
+
+    // Filter products when parameters or allProducts change
+    useEffect(() => {
+        const categoryParam = searchParams.get("category");
+        const searchParam = searchParams.get("search");
+
+        // Sync local state with URL params
+        if (categoryParam) setSelectedCategory(categoryParam);
+        if (searchParam) setSearchTerm(searchParam);
+
+        if (allProducts.length > 0) {
+            let result = [...allProducts];
+
+            if (categoryParam && categoryParam !== "All Categories") {
+                result = result.filter(p =>
+                    p.category && p.category.toLowerCase() === categoryParam.toLowerCase()
+                );
+            }
+
+            if (searchParam) {
+                const lowerSearch = searchParam.toLowerCase();
+                result = result.filter(p =>
+                    (p.name && p.name.toLowerCase().includes(lowerSearch)) ||
+                    (p.description && p.description.toLowerCase().includes(lowerSearch))
+                );
+            }
+
+            setFilteredProducts(result);
+        }
+    }, [searchParams, allProducts]);
+
+    const handleApplyFilters = () => {
+        const params = {};
+        if (selectedCategory && selectedCategory !== "All Categories") {
+            params.category = selectedCategory;
+        }
+        if (searchTerm.trim()) {
+            params.search = searchTerm.trim();
+        }
+        setSearchParams(params);
     };
-    fetchProducts();
-  }, []);
 
-  return (
-    <>
-      <TopBar />
-      <NavBar />
+    return (
+        <>
+            <TopBar />
+            <NavBar />
 
       <PageHeader
         title="Shop"
@@ -120,7 +169,28 @@ const Shop = () => {
           </div>
         </div>
 
-        <MapPlaceholder />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full mb-12">
+                    {loading ? (
+                        <div className="text-center col-span-3">Loading products...</div>
+                    ) : filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => (
+                            <ProductCard
+                                key={product.id || product.tempID}
+                                id={product.id || product.tempID}
+                                title={product.name}
+                                image={product.imageUrl}
+                                soldPercentage={50} // Placeholder as backend doesn't track sales yet
+                                price={product.price}
+                                unit={product.quantity + " Kg"} // Displaying quantity as available stock for now
+                                farmerName={product.farmerName}
+                                location={product.location}
+                                category={product.category}
+                            />
+                        ))
+                    ) : (
+                        <div className="text-center col-span-3">No products found.</div>
+                    )}
+                </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full mb-12">
           {loading ? (

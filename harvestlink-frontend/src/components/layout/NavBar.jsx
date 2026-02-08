@@ -20,19 +20,45 @@ const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { getCartCount } = useCart();
   const profileRef = useRef(null);
+  const categoryRef = useRef(null);
+
+  const categories = ["All Categories", "Vegetables", "Fruits", "Grains", "Spices"];
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (selectedCategory && selectedCategory !== "All Categories") {
+      params.append("category", selectedCategory);
+    }
+    if (searchQuery.trim()) {
+      params.append("search", searchQuery.trim());
+    }
+    navigate(`/shop?${params.toString()}`);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   // Check for logged-in user on component mount
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
 
-    // Close dropdown when clicking outside
+    // Close dropdowns when clicking outside
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
+      }
+      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
+        setIsCategoryOpen(false);
       }
     };
 
@@ -61,19 +87,52 @@ const NavBar = () => {
         </Link>
 
         <div className="hidden md:flex flex-1 pt-4 max-w-xl mx-8">
-          <div className="w-full flex items-center border border-bg-harvest-dark rounded-full bg-white">
-            <button className="flex items-center gap-2 bg-harvest-dark text-white text-sm font-medium px-5 py-2.5 rounded-full hover:bg-opacity-90 transition shrink-0">
-              All Categories <ChevronDown size={14} />
-            </button>
+          <div className="w-full flex items-center border border-bg-harvest-dark rounded-full bg-white relative">
+            <div className="relative" ref={categoryRef}>
+              <button
+                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                className="flex items-center gap-2 bg-harvest-dark text-white text-sm font-medium px-5 py-2.5 rounded-full hover:bg-opacity-90 transition shrink-0"
+              >
+                {selectedCategory} <ChevronDown size={14} />
+              </button>
+
+              {isCategoryOpen && (
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-100 rounded-lg shadow-lg py-1 z-50">
+                  {categories.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => {
+                        setSelectedCategory(category);
+                        setIsCategoryOpen(false);
+                      }}
+                      className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 hover:text-harvest-primary transition ${selectedCategory === category ? "text-harvest-primary font-medium" : "text-gray-700"
+                        }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <input
               type="text"
               className="flex-1 px-4 py-2 text-gray-700 placeholder-gray-400 bg-transparent focus:outline-none"
-              placeholder="Search for fresh produce..."
+              placeholder={
+                selectedCategory === "All Categories"
+                  ? "Search for fresh produce..."
+                  : `Search for ${selectedCategory.toLowerCase()}...`
+              }
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
 
             <div className="pr-4">
-              <Search className="text-gray-400 w-5 h-5 hover:text-harvest-primary cursor-pointer transition" />
+              <Search
+                className="text-gray-400 w-5 h-5 hover:text-harvest-primary cursor-pointer transition"
+                onClick={handleSearch}
+              />
             </div>
           </div>
         </div>
