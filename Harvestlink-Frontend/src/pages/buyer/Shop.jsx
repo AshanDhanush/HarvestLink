@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import PageHeader from "../../components/layout/PageHeader";
 import TopBar from "../../components/layout/Topbar";
-import NavBar from "../../components/layout/Navbar";
+import NavBar from "../../components/layout/NavBar";
 import Footer from "../../components/layout/Footer";
 import ProductCard from "../../components/common/ProductCard";
 // 1. Import the AI Component 👇
@@ -38,14 +39,21 @@ const MapPlaceholder = () => (
 import productService from '../../services/productService';
 
 const Shop = () => {
-    const [products, setProducts] = useState([]);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [allProducts, setAllProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    React.useEffect(() => {
+    // Local state for filter inputs
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("All Categories");
+
+    useEffect(() => {
         const fetchProducts = async () => {
             try {
                 const data = await productService.getAllProducts();
-                setProducts(data);
+                setAllProducts(data);
+                setFilteredProducts(data);
             } catch (error) {
                 console.error("Failed to fetch products", error);
             } finally {
@@ -54,6 +62,47 @@ const Shop = () => {
         };
         fetchProducts();
     }, []);
+
+    // Filter products when parameters or allProducts change
+    useEffect(() => {
+        const categoryParam = searchParams.get("category");
+        const searchParam = searchParams.get("search");
+
+        // Sync local state with URL params
+        if (categoryParam) setSelectedCategory(categoryParam);
+        if (searchParam) setSearchTerm(searchParam);
+
+        if (allProducts.length > 0) {
+            let result = [...allProducts];
+
+            if (categoryParam && categoryParam !== "All Categories") {
+                result = result.filter(p =>
+                    p.category && p.category.toLowerCase() === categoryParam.toLowerCase()
+                );
+            }
+
+            if (searchParam) {
+                const lowerSearch = searchParam.toLowerCase();
+                result = result.filter(p =>
+                    (p.name && p.name.toLowerCase().includes(lowerSearch)) ||
+                    (p.description && p.description.toLowerCase().includes(lowerSearch))
+                );
+            }
+
+            setFilteredProducts(result);
+        }
+    }, [searchParams, allProducts]);
+
+    const handleApplyFilters = () => {
+        const params = {};
+        if (selectedCategory && selectedCategory !== "All Categories") {
+            params.category = selectedCategory;
+        }
+        if (searchTerm.trim()) {
+            params.search = searchTerm.trim();
+        }
+        setSearchParams(params);
+    };
 
     return (
         <>
@@ -75,7 +124,14 @@ const Shop = () => {
                     <div className="grid md:grid-cols-4 gap-4 items-end">
                         <div className="space-y-1">
                             <label className="text-xs font-semibold text-gray-500 uppercase">Search Produce</label>
-                            <input type="text" placeholder="Eg: Tomatoes" className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-harvest-primary focus:ring-1 focus:ring-harvest-primary outline-none" />
+                            <input
+                                type="text"
+                                placeholder="Eg: Tomatoes"
+                                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-harvest-primary focus:ring-1 focus:ring-harvest-primary outline-none"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && handleApplyFilters()}
+                            />
                         </div>
                         <div className="space-y-1">
                             <label className="text-xs font-semibold text-gray-500 uppercase">Location</label>
@@ -92,13 +148,22 @@ const Shop = () => {
                         <div className="flex gap-2">
                             <div className="w-full space-y-1">
                                 <label className="text-xs font-semibold text-gray-500 uppercase">Categories</label>
-                                <select className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-harvest-primary focus:ring-1 focus:ring-harvest-primary outline-none bg-white">
-                                    <option>All Categories</option>
-                                    <option>Vegetables</option>
-                                    <option>Fruits</option>
+                                <select
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-harvest-primary focus:ring-1 focus:ring-harvest-primary outline-none bg-white"
+                                    value={selectedCategory}
+                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                >
+                                    <option value="All Categories">All Categories</option>
+                                    <option value="Vegetables">Vegetables</option>
+                                    <option value="Fruits">Fruits</option>
+                                    <option value="Grains">Grains</option>
+                                    <option value="Spices">Spices</option>
                                 </select>
                             </div>
-                            <button className="h-[42px] w-[42px] flex items-center justify-center bg-gray-100 rounded-lg hover:bg-harvest-primary hover:text-white transition-colors self-end mb-0.5">
+                            <button
+                                onClick={handleApplyFilters}
+                                className="h-[42px] w-[42px] flex items-center justify-center bg-gray-100 rounded-lg hover:bg-harvest-primary hover:text-white transition-colors self-end mb-0.5"
+                            >
                                 <Search size={20} />
                             </button>
                         </div>
@@ -110,8 +175,8 @@ const Shop = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full mb-12">
                     {loading ? (
                         <div className="text-center col-span-3">Loading products...</div>
-                    ) : products.length > 0 ? (
-                        products.map((product) => (
+                    ) : filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => (
                             <ProductCard
                                 key={product.id || product.tempID}
                                 id={product.id || product.tempID}
