@@ -4,10 +4,60 @@ import { useCart } from "../../context/CartContext";
 import toast from 'react-hot-toast';
 
 import { useNavigate } from "react-router-dom";
+import rateService from "../../services/rateService";
+import { useWishlist } from "../../context/WishlistContext";
+import { useState, useEffect } from "react";
 
 const ProductCard = ({ id, image, title, soldPercentage, price, unit, farmerName, location, category }) => {
+  const calculateStart = (id) => {
+    // This is a placeholder
+  }
+  
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { isInWishlist, addToWishlistContext, removeFromWishlistContext } = useWishlist();
+  const [rating, setRating] = useState(0);
+  
+  // Use context for favorite state instead of local state fetching
+  const isFavorite = isInWishlist(id);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchData = async () => {
+      try {
+        if (id) {
+           const avg = await rateService.getAverageRating(id);
+           if (mounted) {
+             setRating(avg);
+           }
+        }
+      } catch (e) {
+        // ignore errors
+      }
+    };
+    fetchData();
+    return () => { mounted = false; };
+  }, [id]);
+
+  const handleToggleFavorite = async (e) => {
+    e.stopPropagation();
+    try {
+      if (isFavorite) {
+        await removeFromWishlistContext(id);
+        toast.success("Removed from wishlist");
+      } else {
+        await addToWishlistContext({ id, image, title, price, unit });
+        toast.success("Added to wishlist");
+      }
+    } catch (err) {
+      if (err.message === "User not logged in") {
+        toast.error("Please login first");
+        navigate('/login');
+      } else {
+        toast.error("Failed to update wishlist");
+      }
+    }
+  };
 
   const handleProductClick = () => {
     if (id) {
@@ -35,8 +85,11 @@ const ProductCard = ({ id, image, title, soldPercentage, price, unit, farmerName
         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-harvest-dark shadow-sm">
           {category || 'Great'}
         </div>
-        <button className="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white text-gray-600 hover:text-red-500 shadow-sm transition-colors duration-300 backdrop-blur-sm">
-          <Heart size={20} />
+        <button 
+          onClick={handleToggleFavorite}
+          className={`absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white shadow-sm transition-colors duration-300 backdrop-blur-sm ${isFavorite ? 'text-red-500' : 'text-gray-600 hover:text-red-500'}`}
+        >
+          <Heart size={20} fill={isFavorite ? "currentColor" : "none"} />
         </button>
       </div>
 
@@ -55,7 +108,12 @@ const ProductCard = ({ id, image, title, soldPercentage, price, unit, farmerName
 
         <div className="flex items-center justify-center gap-1 mb-3 text-yellow-400 text-xs">
           {[...Array(5)].map((_, i) => (
-            <Star key={i} size={12} fill="currentColor" />
+            <Star 
+              key={i} 
+              size={12} 
+              fill={i < Math.round(rating) ? "currentColor" : "none"}
+              className={i < Math.round(rating) ? "text-yellow-400" : "text-gray-300"}
+             />
           ))}
         </div>
 

@@ -13,9 +13,12 @@ import Orders from "./pages/buyer/Orders";
 import Profile from "./pages/buyer/Profile";
 import ProductDetail from "./pages/buyer/ProductDetail";
 import Checkout from "./pages/buyer/Checkout";
+
 import Cart from "./pages/buyer/Cart";
+import Wishlist from "./pages/buyer/Wishlist";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
+import { WishlistProvider } from "./context/WishlistContext";
 
 import About from "./pages/public/About";
 import Contact from "./pages/public/Contact";
@@ -25,38 +28,41 @@ import DeliveryProductsTest from './pages/public/DeliveryProductsTest';
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <Toaster position="top-center" />
-        <BrowserRouter>
-          {/* PAGE CONTENT */}
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/delivery-test" element={<DeliveryProductsTest />} />
-            <Route path="/delivery-charges/:id" element={<DeliveryCharges />} />
+      <WishlistProvider>
+        <CartProvider>
+          <Toaster position="top-center" />
+          <BrowserRouter>
+            {/* PAGE CONTENT */}
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/delivery-test" element={<DeliveryProductsTest />} />
+              <Route path="/delivery-charges/:id" element={<DeliveryCharges />} />
 
-            {/* Buyer Routes */}
-            <Route path="/search" element={<SearchMap />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
+              {/* Buyer Routes */}
+              <Route path="/search" element={<SearchMap />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/wishlist" element={<Wishlist />} />
 
-            {/* Protected Routes (Placeholders) */}
-            <Route path="/farmer/dashboard" element={<FarmerDashboard />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              {/* Protected Routes (Placeholders) */}
+              <Route path="/farmer/dashboard" element={<FarmerDashboard />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
-            {/* 404 Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </CartProvider>
+              {/* 404 Fallback */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </CartProvider>
+      </WishlistProvider>
     </AuthProvider>
   );
 }
