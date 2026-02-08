@@ -1,9 +1,31 @@
 import React from "react";
 import { Star, Heart, ShoppingCart } from "lucide-react";
+import { useCart } from "../../context/CartContext";
+import toast from 'react-hot-toast';
 
-const ProductCard = ({ image, title, soldPercentage, price, unit, farmerName, location, category }) => {
+import { useNavigate } from "react-router-dom";
+
+const ProductCard = ({ id, image, title, soldPercentage, price, unit, farmerName, location, category }) => {
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+
+  const handleProductClick = () => {
+    if (id) {
+      navigate(`/product/${id}`);
+    }
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    addToCart({ id, name: title, imageUrl: image, price, unit, category, farmerName });
+    toast.success('Added to cart');
+  };
+
   return (
-    <div className="bg-white rounded-3xl overflow-hidden shadow-lg shadow-gray-100 border border-gray-100 hover:shadow-xl transition duration-300 group">
+    <div
+      className="bg-white rounded-3xl overflow-hidden shadow-lg shadow-gray-100 border border-gray-100 hover:shadow-xl transition duration-300 group cursor-pointer"
+      onClick={handleProductClick}
+    >
       <div className="relative h-64 overflow-hidden bg-gray-100">
         <img
           src={image || "https://placehold.co/600x400?text=No+Image"}
@@ -43,11 +65,20 @@ const ProductCard = ({ image, title, soldPercentage, price, unit, farmerName, lo
         </div>
 
         <div className="flex items-center justify-center gap-2">
-          <button className="px-8 py-2 border-2 border-gray-300 text-gray-600 font-bold rounded-full hover:border-harvest-primary hover:text-harvest-primary hover:bg-white transition-colors text-sm">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleProductClick();
+            }}
+            className="px-8 py-2 border-2 border-gray-300 text-gray-600 font-bold rounded-full hover:border-harvest-primary hover:text-harvest-primary hover:bg-white transition-colors text-sm"
+          >
             Buy Now
           </button>
-          <button className="p-2 rounded-full border-2 border-gray-300 text-gray-600 hover:border-harvest-primary hover:text-harvest-primary hover:bg-white transition-colors">
-              <ShoppingCart size={20} />
+          <button
+            onClick={handleAddToCart}
+            className="p-2 rounded-full border-2 border-gray-300 text-gray-600 hover:border-harvest-primary hover:text-harvest-primary hover:bg-white transition-colors"
+          >
+            <ShoppingCart size={20} />
           </button>
         </div>
       </div>
