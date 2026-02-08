@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import api from "../../api/axios";
 import axios from 'axios';
 import authService from "../../services/authService";
+import productService from "../../services/productService";
+import orderService from "../../services/orderService";
 import {
   LayoutDashboard,
   Users,
@@ -1389,8 +1391,8 @@ export default function AdminDashboard() {
   }, []);
 
   // Fetch products from backend on mount
+  // Fetch products from backend on mount
   useEffect(() => {
-    const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8085';
     let mounted = true;
 
     (async () => {
@@ -1400,17 +1402,7 @@ export default function AdminDashboard() {
       setProductsError(null);
 
       try {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        const headers = { 'Content-Type': 'application/json' };
-        if (token) headers.Authorization = `Bearer ${token}`;
-
-        const res = await fetch(`${API_BASE}/api/product/getAll`, {
-          method: 'GET',
-          headers,
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        const data = await productService.getAllProducts();
         if (mounted) setProducts(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Failed to fetch products:', err);
@@ -1434,12 +1426,8 @@ export default function AdminDashboard() {
       setOrdersError(null);
 
       try {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        const headers = { 'Content-Type': 'application/json' };
-        if (token) headers.Authorization = `Bearer ${token}`;
-
-        const res = await axios.get('http://localhost:8085/api/order/get/Orders', { headers });
-        const raw = Array.isArray(res.data) ? res.data : [];
+        const resData = await orderService.getOrders();
+        const raw = Array.isArray(resData) ? resData : [];
         const normalized = raw.map((o) => {
           const customerName = o.customerName
             || o.customer
@@ -1472,13 +1460,9 @@ export default function AdminDashboard() {
       if (!mounted) return;
 
       try {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        const headers = { 'Content-Type': 'application/json' };
-        if (token) headers.Authorization = `Bearer ${token}`;
-
-        const res = await axios.get('http://localhost:8085/api/order/get/revenue', { headers });
-        if (mounted && res.data) {
-          setRevenueData(res.data);
+        const data = await orderService.getMonthlyRevenue();
+        if (mounted && data) {
+          setRevenueData(data);
         }
       } catch (err) {
         console.error('Failed to fetch revenue data:', err);
@@ -1502,13 +1486,11 @@ export default function AdminDashboard() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      console.log('Total Farmers API Response:', data);
       if (data) {
         setTotalFarmersData({
           TotalFarmers: data.TotalFarmers ,
           percentageChangeAccordingToMonth: data.percentageChangeAccordingToMonth ,
         });
-        console.log('TotalFarmersData State Updated:', { TotalFarmers: data.TotalFarmers, percentageChangeAccordingToMonth: data.percentageChangeAccordingToMonth });
       }
     } catch (err) {
       console.error('Failed to fetch total farmers data:', err);
@@ -1529,13 +1511,11 @@ export default function AdminDashboard() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      console.log('Total Businesses API Response:', data);
       if (data) {
         setTotalBusinessesData({
           TotalBusinesses: data.TotalBuyers || data.TotalBusinesses || 58,
           percentageChangeAccordingToMonth: data.percentageChangeAccordingToMonth,
         });
-        console.log('TotalBusinessesData State Updated:', { TotalBusinesses: data.TotalBuyers || data.TotalBusinesses, percentageChangeAccordingToMonth: data.percentageChangeAccordingToMonth });
       }
     } catch (err) {
       console.error('Failed to fetch total businesses data:', err);
@@ -1569,6 +1549,7 @@ export default function AdminDashboard() {
         const headers = { 'Content-Type': 'application/json' };
         if (token) headers.Authorization = `Bearer ${token}`;
 
+        // Updated port from 8085 to 8080 to use User Service directly
         const res = await fetch('http://localhost:8080/api/v1/admin/get/orders/pending', {
           method: 'GET',
           headers,
@@ -1582,11 +1563,9 @@ export default function AdminDashboard() {
             PendingOrders: data.PendingOrders || 32,
             percentageChangeAccordingToMonth: data.percentageChangeAccordingToMonth || -5.0,
           });
-          console.log('PendingOrdersData State Updated:', { PendingOrders: data.PendingOrders, percentageChangeAccordingToMonth: data.percentageChangeAccordingToMonth });
         }
       } catch (err) {
         console.error('Failed to fetch pending orders data:', err);
-        // Keep default values on error
       }
     })();
 
@@ -1602,20 +1581,7 @@ export default function AdminDashboard() {
       if (!mounted) return;
 
       try {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        const headers = { 'Content-Type': 'application/json' };
-        if (token) headers.Authorization = `Bearer ${token}`;
-
-        const res = await fetch('http://localhost:8085/api/order/get/topsellingproducts', {
-          method: 'GET',
-          headers,
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        console.log('Top Selling Products API Response:', data);
-        console.log('Response Type:', typeof data);
-        console.log('Is Array:', Array.isArray(data));
+        const data = await orderService.getTopSellingProducts();
         
         if (mounted) {
           let productsArray = [];
@@ -1635,13 +1601,10 @@ export default function AdminDashboard() {
             }
           }
           
-          console.log('Products Array to Set:', productsArray);
           setTopSellingProducts(productsArray);
-          console.log('TopSellingProducts State Updated with', productsArray.length, 'items');
         }
       } catch (err) {
         console.error('Failed to fetch top selling products:', err);
-    
       }
     })();
 
