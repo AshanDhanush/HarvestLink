@@ -37,9 +37,13 @@ const MapPlaceholder = () => (
 
 import productService from '../../services/productService';
 
+import { useSearchParams } from 'react-router-dom';
+
 const Shop = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const categoryParam = searchParams.get('category');
 
     React.useEffect(() => {
         const fetchProducts = async () => {
@@ -54,6 +58,19 @@ const Shop = () => {
         };
         fetchProducts();
     }, []);
+
+    const filteredProducts = categoryParam
+        ? products.filter(product => product.category && product.category.toLowerCase() === categoryParam.toLowerCase())
+        : products;
+
+    const handleCategoryChange = (e) => {
+        const selectedCategory = e.target.value;
+        if (selectedCategory === 'All Categories') {
+            setSearchParams({});
+        } else {
+            setSearchParams({ category: selectedCategory });
+        }
+    };
 
     return (
         <>
@@ -92,10 +109,17 @@ const Shop = () => {
                         <div className="flex gap-2">
                             <div className="w-full space-y-1">
                                 <label className="text-xs font-semibold text-gray-500 uppercase">Categories</label>
-                                <select className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-harvest-primary focus:ring-1 focus:ring-harvest-primary outline-none bg-white">
-                                    <option>All Categories</option>
-                                    <option>Vegetables</option>
-                                    <option>Fruits</option>
+                                <select
+                                    value={categoryParam || 'All Categories'}
+                                    onChange={handleCategoryChange}
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-harvest-primary focus:ring-1 focus:ring-harvest-primary outline-none bg-white"
+                                >
+                                    <option value="All Categories">All Categories</option>
+                                    <option value="Vegetables">Vegetables</option>
+                                    <option value="Fruits">Fruits</option>
+                                    <option value="Grains">Grains</option>
+                                    <option value="Spices">Spices</option>
+                                    <option value="Other">Other</option>
                                 </select>
                             </div>
                             <button className="h-[42px] w-[42px] flex items-center justify-center bg-gray-100 rounded-lg hover:bg-harvest-primary hover:text-white transition-colors self-end mb-0.5">
@@ -110,8 +134,8 @@ const Shop = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full mb-12">
                     {loading ? (
                         <div className="text-center col-span-3">Loading products...</div>
-                    ) : products.length > 0 ? (
-                        products.map((product) => (
+                    ) : filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => (
                             <ProductCard
                                 key={product.id || product.tempID}
                                 id={product.id || product.tempID}
@@ -126,7 +150,7 @@ const Shop = () => {
                             />
                         ))
                     ) : (
-                        <div className="text-center col-span-3">No products found.</div>
+                        <div className="text-center col-span-3">No products found for this category.</div>
                     )}
                 </div>
 
