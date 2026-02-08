@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import authService from "../../services/authService";
 import { User, Mail, Phone, MapPin, Save, Loader } from "lucide-react";
-import NavBar from "../../components/layout/NavBar";
+import NavBar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 
 const Profile = () => {

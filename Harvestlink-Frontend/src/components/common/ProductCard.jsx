@@ -1,5 +1,5 @@
 import React from "react";
-import { Star, Heart } from "lucide-react";
+import { Star, Heart, ShoppingCart } from "lucide-react";
 
 const ProductCard = ({ image, title, soldPercentage, price, unit, farmerName, location, category }) => {
   return (
@@ -42,9 +42,14 @@ const ProductCard = ({ image, title, soldPercentage, price, unit, farmerName, lo
           <span className="text-xs text-gray-400 font-medium">PER 1KG</span>
         </div>
 
-        <button className="px-8 py-2 border-2 border-gray-300 text-gray-600 font-bold rounded-full hover:border-harvest-primary hover:text-harvest-primary hover:bg-white transition-colors text-sm">
-          Buy Now
-        </button>
+        <div className="flex items-center justify-center gap-2">
+          <button className="px-8 py-2 border-2 border-gray-300 text-gray-600 font-bold rounded-full hover:border-harvest-primary hover:text-harvest-primary hover:bg-white transition-colors text-sm">
+            Buy Now
+          </button>
+          <button className="p-2 rounded-full border-2 border-gray-300 text-gray-600 hover:border-harvest-primary hover:text-harvest-primary hover:bg-white transition-colors">
+              <ShoppingCart size={20} />
+          </button>
+        </div>
       </div>
     </div>
   );

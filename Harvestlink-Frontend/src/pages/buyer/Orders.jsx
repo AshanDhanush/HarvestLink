@@ -3,7 +3,7 @@ import authService from "../../services/authService";
 import orderService from "../../services/orderService";
 import { Package, Calendar, MapPin, ChevronRight, Loader, ShoppingBag } from "lucide-react";
 import { Link } from "react-router-dom";
-import NavBar from "../../components/layout/NavBar";
+import NavBar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 
 const Orders = () => {
