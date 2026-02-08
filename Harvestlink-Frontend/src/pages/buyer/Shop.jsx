@@ -192,28 +192,7 @@ const Shop = () => {
                     )}
                 </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full mb-12">
-          {loading ? (
-            <div className="text-center col-span-3">Loading products...</div>
-          ) : products.length > 0 ? (
-            products.map((product) => (
-              <ProductCard
-                key={product.id || product.tempID}
-                id={product.id || product.tempID}
-                title={product.name}
-                image={product.imageUrl}
-                soldPercentage={50} // Placeholder as backend doesn't track sales yet
-                price={product.price}
-                unit={product.quantity + " Kg"} // Displaying quantity as available stock for now
-                farmerName={product.farmerName}
-                location={product.location}
-                category={product.category}
-              />
-            ))
-          ) : (
-            <div className="text-center col-span-3">No products found.</div>
-          )}
-        </div>
+
 
         {/* Pagination */}
         <div className="flex justify-center mb-16">
