@@ -12,6 +12,7 @@ import Shop from "./pages/buyer/Shop";
 import Orders from "./pages/buyer/Orders";
 import Profile from "./pages/buyer/Profile";
 import ProductDetail from "./pages/buyer/ProductDetail";
+import Checkout from "./pages/buyer/Checkout";
 import Cart from "./pages/buyer/Cart";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
@@ -45,6 +46,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
 
             {/* Protected Routes (Placeholders) */}
             <Route path="/farmer/dashboard" element={<FarmerDashboard />} />
