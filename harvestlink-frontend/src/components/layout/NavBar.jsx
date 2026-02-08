@@ -165,6 +165,13 @@ const NavBar = () => {
                         >
                           <User size={16} /> Profile
                         </Link>
+                        <Link
+                          to="/orders"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-harvest-primary transition"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          <ShoppingCart size={16} /> Orders
+                        </Link>
                       </>
                     ) : (
                       <>
@@ -264,6 +271,13 @@ const NavBar = () => {
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <LayoutDashboard size={18} /> Add Product
+                    </Link>
+                    <Link
+                      to="/orders"
+                      className="py-2 text-harvest-text font-medium flex items-center gap-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <ShoppingCart size={18} /> Orders
                     </Link>
                     <Link
                       to="/farmer/dashboard?view=profile"

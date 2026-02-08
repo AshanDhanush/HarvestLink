@@ -101,11 +101,11 @@ const ProductDetail = () => {
                 <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
                         {/* Image Section */}
-                        <div className="bg-gray-100 p-8 flex items-center justify-center relative min-h-[400px]">
+                        <div className="bg-white flex items-center justify-center relative h-full w-full">
                             <img
                                 src={product.imageUrl || "https://placehold.co/600x600?text=No+Image"}
                                 alt={product.name}
-                                className="w-full h-full object-contain max-h-[500px] mix-blend-multiply"
+                                className="h-full object-contain mix-blend-multiply"
                             />
                             <button className="absolute top-6 right-6 p-3 rounded-full bg-white/80 hover:bg-white text-gray-600 hover:text-red-500 shadow-sm transition-colors backdrop-blur-sm">
                                 <Heart size={24} />

@@ -20,8 +20,8 @@
         </processorPath>
         <module name="Harvestlink (2)" />
         <module name="Harvestlink" />
-        <module name="api-product" />
         <module name="Harvestlink (1)" />
+        <module name="api-product" />
       </profile>
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
