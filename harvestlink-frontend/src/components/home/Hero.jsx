@@ -37,7 +37,7 @@ const Hero = () => {
           </p>
 
           <Link
-            to="/search"
+            to="/shop"
             className="bg-harvest-primary text-white font-bold py-4 px-8 rounded-full inline-flex items-center gap-2 hover:bg-harvest-primary-hover transition transform hover:scale-105 shadow-lg shadow-lime-900/20"
           >
             Shop Now <ArrowRight size={20} />
