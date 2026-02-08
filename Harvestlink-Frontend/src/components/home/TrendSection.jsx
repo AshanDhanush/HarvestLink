@@ -1,4 +1,6 @@
+import React, { useState, useEffect } from 'react';
 import productService from '../../services/productService';
+import ProductCard from '../common/ProductCard';
 
 const TrendSection = () => {
     const [activeTab, setActiveTab] = useState("Latest");
@@ -7,7 +9,7 @@ const TrendSection = () => {
 
     const tabs = ["Featured", "Latest", "Popular"];
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchProducts = async () => {
             try {
                 const data = await productService.getAllProducts();
