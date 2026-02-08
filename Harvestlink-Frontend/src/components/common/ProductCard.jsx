@@ -1,15 +1,24 @@
 import React from "react";
 import { Star, Heart, ShoppingCart } from "lucide-react";
+import { useCart } from "../../context/CartContext";
+import toast from 'react-hot-toast';
 
 import { useNavigate } from "react-router-dom";
 
 const ProductCard = ({ id, image, title, soldPercentage, price, unit, farmerName, location, category }) => {
   const navigate = useNavigate();
+  const { addToCart } = useCart();
 
   const handleProductClick = () => {
     if (id) {
       navigate(`/product/${id}`);
     }
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    addToCart({ id, name: title, imageUrl: image, price, unit, category, farmerName });
+    toast.success('Added to cart');
   };
 
   return (
@@ -66,7 +75,7 @@ const ProductCard = ({ id, image, title, soldPercentage, price, unit, farmerName
             Buy Now
           </button>
           <button
-            onClick={(e) => e.stopPropagation()}
+            onClick={handleAddToCart}
             className="p-2 rounded-full border-2 border-gray-300 text-gray-600 hover:border-harvest-primary hover:text-harvest-primary hover:bg-white transition-colors"
           >
             <ShoppingCart size={20} />

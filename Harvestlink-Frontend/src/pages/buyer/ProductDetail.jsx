@@ -5,6 +5,8 @@ import TopBar from '../../components/layout/Topbar';
 import NavBar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import productService from '../../services/productService';
+import { useCart } from '../../context/CartContext';
+import toast from 'react-hot-toast';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -13,6 +15,7 @@ const ProductDetail = () => {
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
     const [error, setError] = useState(null);
+    const { addToCart } = useCart();
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -37,6 +40,17 @@ const ProductDetail = () => {
             setQuantity(prev => prev + 1);
         } else {
             setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+        }
+    };
+
+    const handleAddToCart = (redirect = false) => {
+        if (product) {
+            addToCart({ ...product, id: product.id || product.tempID }, quantity);
+            if (redirect) {
+                navigate('/cart');
+            } else {
+                toast.success('Added to cart');
+            }
         }
     };
 
@@ -159,10 +173,14 @@ const ProductDetail = () => {
                                     </button>
                                 </div>
                                 <div className="flex-1 flex gap-3">
-                                    <button className="flex-1 bg-harvest-primary hover:bg-harvest-dark text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-lg shadow-green-200 flex items-center justify-center gap-2">
+                                    <button
+                                        onClick={() => handleAddToCart(true)}
+                                        className="flex-1 bg-harvest-primary hover:bg-harvest-dark text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-lg shadow-green-200 flex items-center justify-center gap-2">
                                         Buy Now
                                     </button>
-                                    <button className="p-3 border-2 border-gray-200 rounded-xl hover:border-harvest-primary hover:text-harvest-primary text-gray-600 transition-colors">
+                                    <button
+                                        onClick={() => handleAddToCart(false)}
+                                        className="p-3 border-2 border-gray-200 rounded-xl hover:border-harvest-primary hover:text-harvest-primary text-gray-600 transition-colors">
                                         <ShoppingCart size={24} />
                                     </button>
                                 </div>
