@@ -105,7 +105,7 @@ const ProductDetail = () => {
                             <img
                                 src={product.imageUrl || "https://placehold.co/600x600?text=No+Image"}
                                 alt={product.name}
-                                className="h-full object-contain mix-blend-multiply"
+                                className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                             />
                             <button className="absolute top-6 right-6 p-3 rounded-full bg-white/80 hover:bg-white text-gray-600 hover:text-red-500 shadow-sm transition-colors backdrop-blur-sm">
                                 <Heart size={24} />
