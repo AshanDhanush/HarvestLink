@@ -1,10 +1,5 @@
-import axios from 'axios';
+import api from '../api/axios';
 import authService from './authService';
-
-// Use same base as user service (port 8080/8085 depending on gateway)
-// Assuming direct access or gateway for now. The previous files used 8085 for admin and 8080 checks.
-// Let's use VITE_API_BASE or default to 8080 for user service if distinct from product service.
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
 
 const wishlistService = {
 
@@ -21,7 +16,9 @@ const wishlistService = {
         };
 
         try {
-            await axios.post(`${API_BASE}/api/v1/user/wishlist/add`, payload);
+            // api has baseURL 'http://localhost:8085/api/v1', so we append '/user/wishlist/add'
+            // If the backend controller is at /api/v1/user/wishlist, then relative path is /user/wishlist
+            await api.post('/user/wishlist/add', payload);
         } catch (error) {
             console.error("Error adding to wishlist", error);
             throw error;
@@ -33,7 +30,7 @@ const wishlistService = {
         if (!user) throw new Error("User not logged in");
 
         try {
-            await axios.delete(`${API_BASE}/api/v1/user/wishlist/remove/${user.email}/${productId}`);
+            await api.delete(`/user/wishlist/remove/${user.email}/${productId}`);
         } catch (error) {
             console.error("Error removing from wishlist", error);
             throw error;
@@ -45,7 +42,7 @@ const wishlistService = {
         if (!user) return [];
 
         try {
-            const response = await axios.get(`${API_BASE}/api/v1/user/wishlist/get/${user.email}`);
+            const response = await api.get(`/user/wishlist/get/${user.email}`);
             return response.data;
         } catch (error) {
             console.error("Error fetching wishlist", error);
@@ -58,7 +55,7 @@ const wishlistService = {
         if (!user) return false;
 
         try {
-            const response = await axios.get(`${API_BASE}/api/v1/user/wishlist/check/${user.email}/${productId}`);
+            const response = await api.get(`/user/wishlist/check/${user.email}/${productId}`);
             return response.data;
         } catch (error) {
             return false;

@@ -239,6 +239,13 @@ const NavBar = () => {
                         >
                           <ShoppingCart size={16} /> Orders
                         </Link>
+                        <Link
+                          to="/wishlist"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-harvest-primary transition"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          <Heart size={16} /> Wishlist
+                        </Link>
                       </>
                     ) : (
                       <>
@@ -248,6 +255,13 @@ const NavBar = () => {
                           onClick={() => setIsProfileOpen(false)}
                         >
                           <ShoppingCart size={16} /> Orders
+                        </Link>
+                        <Link
+                          to="/wishlist"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-harvest-primary transition"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          <Heart size={16} /> Wishlist
                         </Link>
                         <Link
                           to="/profile"
@@ -347,6 +361,13 @@ const NavBar = () => {
                       <ShoppingCart size={18} /> Orders
                     </Link>
                     <Link
+                      to="/wishlist"
+                      className="py-2 text-harvest-text font-medium flex items-center gap-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Heart size={18} /> Wishlist
+                    </Link>
+                    <Link
                       to="/farmer/dashboard?view=profile"
                       className="py-2 text-harvest-text font-medium flex items-center gap-2"
                       onClick={() => setIsMenuOpen(false)}
@@ -362,6 +383,13 @@ const NavBar = () => {
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <ShoppingCart size={18} /> Orders
+                    </Link>
+                    <Link
+                      to="/wishlist"
+                      className="py-2 text-harvest-text font-medium flex items-center gap-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Heart size={18} /> Wishlist
                     </Link>
                     <Link
                       to="/profile"

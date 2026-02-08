@@ -11,7 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/user/wishlist")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+
 public class WishlistController {
 
     private final WishlistService wishlistService;
