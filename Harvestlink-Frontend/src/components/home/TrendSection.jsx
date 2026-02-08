@@ -53,6 +53,7 @@ const TrendSection = () => {
                         products.map((product) => (
                             <ProductCard
                                 key={product.id || product.tempID}
+                                id={product.id || product.tempID}
                                 title={product.name}
                                 image={product.imageUrl}
                                 soldPercentage={65} // Placeholder

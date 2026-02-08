@@ -12,6 +12,16 @@ const getAllProducts = async () => {
   }
 };
 
+const getProductById = async (id) => {
+  try {
+    const response = await axios.get(`${API_URL}/getby/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching product with id ${id}`, error);
+    throw error;
+  }
+};
+
 const createProduct = async (productData, imageFile) => {
   const formData = new FormData();
   // productData should be a JSON string or object. 
@@ -60,6 +70,7 @@ const deleteProduct = async (id) => {
 
 export default {
   getAllProducts,
+  getProductById,
   createProduct,
   updateProduct,
   deleteProduct

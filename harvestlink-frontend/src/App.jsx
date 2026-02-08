@@ -7,9 +7,10 @@ import Register from "./pages/auth/Register";
 import FarmerDashboard from "./pages/farmer/FarmerDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import SearchMap from "./pages/buyer/SearchMap";
-import Shop from "./pages/buyer/Shop"; 
+import Shop from "./pages/buyer/Shop";
 import Orders from "./pages/buyer/Orders";
 import Profile from "./pages/buyer/Profile";
+import ProductDetail from "./pages/buyer/ProductDetail";
 
 import About from "./pages/public/About";
 import Contact from "./pages/public/Contact";
@@ -33,6 +34,7 @@ function App() {
         <Route path="/search" element={<SearchMap />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
 
         {/* Protected Routes (Placeholders) */}
         <Route path="/farmer/dashboard" element={<FarmerDashboard />} />

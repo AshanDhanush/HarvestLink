@@ -110,6 +110,7 @@ const Shop = () => {
                         products.map((product) => (
                             <ProductCard
                                 key={product.id || product.tempID}
+                                id={product.id || product.tempID}
                                 title={product.name}
                                 image={product.imageUrl}
                                 soldPercentage={50} // Placeholder as backend doesn't track sales yet
