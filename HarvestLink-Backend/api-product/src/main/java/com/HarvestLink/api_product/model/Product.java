@@ -26,4 +26,6 @@ public class Product {
     private Integer quantity;
     private java.time.LocalDate dateAdded;
     private java.time.LocalDate expiryDate;
+    private Double averageRating = 0.0;
+    private Integer soldCount = 0;
 }

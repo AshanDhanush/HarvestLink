@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from "react-router-dom";
 import productService from '../../services/productService';
 import ProductCard from '../common/ProductCard';
 
@@ -7,12 +8,21 @@ const TrendSection = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const tabs = ["Featured", "Latest", "Popular"];
+    const tabs = ["Latest", "Top Rated", "Popular"];
 
     useEffect(() => {
         const fetchProducts = async () => {
+            setLoading(true);
             try {
-                const data = await productService.getAllProducts();
+                let data = [];
+                if (activeTab === "Latest") {
+                    data = await productService.getLatest();
+                } else if (activeTab === "Top Rated") {
+                    data = await productService.getTopRated();
+                } else if (activeTab === "Popular") {
+                    data = await productService.getPopular();
+                }
+                
                 // Take only first 6 for the trend section
                 setProducts(data.slice(0, 6));
             } catch (error) {
@@ -22,7 +32,7 @@ const TrendSection = () => {
             }
         };
         fetchProducts();
-    }, []);
+    }, [activeTab]);
 
     return (
         <section className="py-20 bg-gray-50">
@@ -70,9 +80,9 @@ const TrendSection = () => {
                 </div>
 
                 <div className="text-center mt-12">
-                    <button className="bg-lime-500 hover:bg-lime-600 text-white font-bold py-3 px-10 rounded-full shadow-lg shadow-lime-500/30 transition transform hover:scale-[1.02]">
+                    <Link to="/shop" className="bg-lime-500 hover:bg-lime-600 text-white font-bold py-3 px-10 rounded-full shadow-lg shadow-lime-500/30 transition transform hover:scale-[1.02] inline-block">
                         Shop More
-                    </button>
+                    </Link>
                 </div>
             </div>
         </section>

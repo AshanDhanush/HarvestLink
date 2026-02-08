@@ -12,6 +12,46 @@ const getAllProducts = async () => {
   }
 };
 
+const getProductsByCategory = async (category) => {
+  try {
+    const response = await axios.get(`${API_URL}/get/category/${category}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching products by category ${category}`, error);
+    throw error;
+  }
+};
+
+const getLatest = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/latest`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching latest products", error);
+    throw error;
+  }
+};
+
+const getTopRated = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/top-rated`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching top-rated products", error);
+    throw error;
+  }
+};
+
+const getPopular = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/popular`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching popular products", error);
+    throw error;
+  }
+};
+
 const getProductById = async (id) => {
   try {
     const response = await axios.get(`${API_URL}/getby/${id}`);
@@ -73,5 +113,9 @@ export default {
   getProductById,
   createProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  getLatest,
+  getTopRated,
+  getPopular,
+  getProductsByCategory
 };

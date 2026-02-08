@@ -53,4 +53,22 @@ public class ProductController {
     public void deleteProduct(@PathVariable String id) {
         productService.deleteProduct(id);
     }
+
+    @GetMapping("/latest")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ProductResponse> getLatestProducts() {
+        return productService.getLatestProducts();
+    }
+
+    @GetMapping("/top-rated")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ProductResponse> getTopRatedProducts() {
+        return productService.getTopRatedProducts();
+    }
+
+    @GetMapping("/popular")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ProductResponse> getPopularProducts() {
+        return productService.getPopularProducts();
+    }
 }

@@ -1,6 +1,5 @@
 package com.HarvestLink.api_product.service;
 
-import com.HarvestLink.api_product.model.OrderItems;
 import com.HarvestLink.api_product.model.Product;
 import com.HarvestLink.api_product.model.ProductRequest;
 import com.HarvestLink.api_product.model.ProductResponse;
@@ -90,6 +89,21 @@ public class ProductServiceImpl implements ProductService {
      */
 
     @Override
+    public List<ProductResponse> getLatestProducts() {
+        return productRepository.findAllByOrderByDateAddedDesc().stream().map(this::mapToProductResponse).toList();
+    }
+
+    @Override
+    public List<ProductResponse> getTopRatedProducts() {
+        return productRepository.findAllByOrderByAverageRatingDesc().stream().map(this::mapToProductResponse).toList();
+    }
+
+    @Override
+    public List<ProductResponse> getPopularProducts() {
+        return productRepository.findAllByOrderBySoldCountDesc().stream().map(this::mapToProductResponse).toList();
+    }
+
+    @Override
     public List<ProductResponse> getAllProducts() {
         return productRepository.findAll().stream().map(this::mapToProductResponse).toList();
     }
@@ -113,7 +127,10 @@ public class ProductServiceImpl implements ProductService {
                 req.getPrice(),
                 req.getQuantity(),
                 java.time.LocalDate.now(),
-                req.getExpiryDate());
+                req.getExpiryDate(),
+                0.0, // Default averageRating
+                0 // Default soldCount
+        );
     }
 
     private ProductResponse mapToProductResponse(Product p) {

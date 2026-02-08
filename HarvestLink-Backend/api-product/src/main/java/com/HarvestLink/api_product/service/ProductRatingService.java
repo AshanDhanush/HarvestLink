@@ -16,10 +16,16 @@ import java.util.OptionalDouble;
 public class ProductRatingService {
 
     private final ProductRatingRepository productRatingRepository;
+    private final com.HarvestLink.api_product.repository.ProductRepository productRepository; // Full package to avoid
+                                                                                              // import clash if any
 
     public void addRating(ProductRating productRating) {
         productRating.setCreatedAt(LocalDateTime.now().toString());
         productRatingRepository.save(productRating);
+
+        // Update product average rating
+        updateProductAverageRating(productRating.getProductId());
+
         log.info("Rating added for product: {}", productRating.getProductId());
     }
 
@@ -36,5 +42,18 @@ public class ProductRatingService {
                 .mapToInt(ProductRating::getRating)
                 .average();
         return average.orElse(0.0);
+    }
+
+    private void updateProductAverageRating(String productId) {
+        Double avg = getAverageRating(productId);
+        productRepository.findByTempID(productId).ifPresent(product -> {
+            product.setAverageRating(avg);
+            productRepository.save(product);
+        });
+        // Also check by ID if tempID match fails (depending on how ID is stored)
+        productRepository.findById(productId).ifPresent(product -> {
+            product.setAverageRating(avg);
+            productRepository.save(product);
+        });
     }
 }
