@@ -18,12 +18,14 @@ const Orders = () => {
     const fetchOrders = async () => {
       try {
         const allOrders = await orderService.getOrders();
-        // In a real app, the backend should filter by user ID.
-        // For now, we filter on frontend if possible, or show all for demo if no specific field matches perfectly.
-        // Ideally: allOrders.filter(o => o.customerId === currentUser.id)
         
-        // Mock filtering (or showing all if structure uncertain for now)
-        setOrders(allOrders); 
+        // Filter orders by current user's email
+        const userOrders = allOrders.filter(order => 
+            (order.customerEmail && order.customerEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
+            (order.CustomerEmail && order.CustomerEmail.toLowerCase() === currentUser.email.toLowerCase())
+        );
+        
+        setOrders(userOrders); 
       } catch (error) {
         console.error("Error fetching orders:", error);
       } finally {
@@ -83,21 +85,28 @@ const Orders = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              {orders.map((order) => (
+              {orders.map((order) => {
+                // Construct products array from parallel lists if needed, or handle display differently
+                const products = order.productNames ? order.productNames.map((name, index) => ({
+                    name: name,
+                    quantity: order.quantity ? order.quantity[index] : 0,
+                    price: 0 // Price per item not available in OrderResponse
+                })) : [];
+
+                return (
                 <div
-                  key={order.id}
+                  key={order.disID || order.id} // Use disID from backend
                   className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition duration-200"
                 >
                   <div className="p-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                       <div>
                         <p className="text-sm text-gray-500 mb-1">Order ID</p>
-                        <p className="font-mono font-bold text-gray-900">#{order.id.slice(-8).toUpperCase()}</p>
+                        <p className="font-mono font-bold text-gray-900">#{order.disID ? order.disID.slice(-8).toUpperCase() : (order.id ? order.id.slice(-8).toUpperCase() : 'N/A')}</p>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-500">
                         <Calendar size={16} />
-                        {/* Formatted Date if available, else generic */}
-                        <span>{new Date().toLocaleDateString()}</span> 
+                        <span>{order.date || new Date().toLocaleDateString()}</span> 
                       </div>
                       <div className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold uppercase tracking-wide w-fit">
                         {order.status || "Pending"}
@@ -110,12 +119,12 @@ const Orders = () => {
                       <div>
                           <h4 className="font-semibold text-gray-900 mb-2">Items</h4>
                           <ul className="space-y-2">
-                               {/* Assuming order.products or similar structure */}
-                               {order.products ? (
-                                   order.products.map((prod, idx) => (
+                               {products.length > 0 ? (
+                                   products.map((prod, idx) => (
                                        <li key={idx} className="text-sm text-gray-600 flex justify-between">
                                            <span>{prod.name} x {prod.quantity}</span>
-                                           <span className="font-medium">LKR {prod.price * prod.quantity}</span>
+                                           {/* Hide price if 0 or unavailable */}
+                                           {/* <span className="font-medium">LKR ...</span> */}
                                        </li>
                                    ))
                                ) : (
@@ -127,7 +136,7 @@ const Orders = () => {
                           <h4 className="font-semibold text-gray-900 mb-2">Delivery</h4>
                           <div className="flex items-start gap-2 text-sm text-gray-600">
                               <MapPin size={16} className="mt-0.5 shrink-0" />
-                              <p>{user.address || "Address not provided"}</p>
+                              <p>{order.deliveryAddress || user.address || "Address not provided"}</p>
                           </div>
                       </div>
                     </div>
@@ -136,11 +145,11 @@ const Orders = () => {
                     
                     <div className="flex justify-between items-center bg-gray-50 -mx-6 -mb-6 px-6 py-4 mt-2">
                         <span className="font-medium text-gray-900">Total Amount</span>
-                        <span className="text-xl font-bold text-green-700">LKR {order.totalAmount || "0.00"}</span>
+                        <span className="text-xl font-bold text-green-700">LKR {order.totalPrice || order.totalAmount || "0.00"}</span>
                     </div>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           )}
         </div>

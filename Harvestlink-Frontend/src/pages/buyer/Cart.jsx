@@ -118,7 +118,10 @@ const Cart = () => {
                                     </div>
                                 </div>
 
-                                <button className="w-full bg-harvest-primary hover:bg-harvest-dark text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-green-200 mb-4">
+                                <button 
+                                    onClick={() => navigate('/checkout')}
+                                    className="w-full bg-harvest-primary hover:bg-harvest-dark text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-green-200 mb-4"
+                                >
                                     Proceed to Checkout
                                 </button>
 

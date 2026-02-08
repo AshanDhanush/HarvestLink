@@ -407,7 +407,7 @@ const TopProductsWidget = ({ products = [] }) => (
                 <Leaf size={18} className={`text-emerald-800`} />
               </div>
               <div>
-                <p className="font-bold text-gray-800 text-sm">{product.productName}</p>
+                <p className="font-bold text-gray-800 text-sm">{product.productName || product.name || 'Unknown Product'}</p>
                 <p className="text-xs text-gray-400 font-medium">{product.totalSold} sold</p>
               </div>
             </div>
@@ -1008,9 +1008,9 @@ const ProductsCRUDSection = ({ products, onAddClick, onEditClick, onDeleteClick 
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className={`h-8 w-8 rounded-full bg-lime-200 flex items-center justify-center font-bold`} style={{ color: colors.primaryDark }}>
-                          {product.productName ? product.productName.charAt(0).toUpperCase() : 'P'}
+                          {(product.name || product.productName || 'P').charAt(0).toUpperCase()}
                         </div>
-                        <span className="text-gray-800 font-bold">{product.productName || '-'}</span>
+                        <span className="text-gray-800 font-bold">{product.name || product.productName || '-'}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-gray-600">{product.category || '-'}</td>
