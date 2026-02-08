@@ -10,6 +10,7 @@ import {
   ChevronDown,
   LogOut,
   Settings,
+  LayoutDashboard,
 } from "lucide-react";
 import logo from "../../assets/Logo-L_1@0.75x.png";
 import authService from "../../services/authService";
@@ -134,7 +135,27 @@ const NavBar = () => {
                       <p className="text-xs text-gray-500 truncate">
                         {user.email}
                       </p>
+
                     </div>
+
+                    {(user.role === 'FARMER' || user.role === 'Farmer') && (
+                      <>
+                        <Link
+                          to="/farmer/dashboard"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-harvest-primary transition"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          <LayoutDashboard size={16} /> Dashboard
+                        </Link>
+                        <Link
+                          to="/farmer/dashboard?view=add-harvest"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-harvest-primary transition"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          <LayoutDashboard size={16} /> Add Product
+                        </Link>
+                      </>
+                    )}
 
                     <Link
                       to="/profile"
@@ -210,6 +231,30 @@ const NavBar = () => {
             {/* Mobile Menu User Options */}
             {user ? (
               <>
+                <div className="border-b border-gray-100 pb-2 mb-2">
+                  <p className="px-2 text-sm font-semibold text-gray-800">{user.firstName || user.name || "User"}</p>
+                  <p className="px-2 text-xs text-gray-500">{user.email}</p>
+                </div>
+
+                {(user.role === 'FARMER' || user.role === 'Farmer') && (
+                  <>
+                    <Link
+                       to="/farmer/dashboard"
+                       className="py-2 text-harvest-text font-medium flex items-center gap-2"
+                       onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard size={18} /> Dashboard
+                    </Link>
+                    <Link
+                       to="/farmer/dashboard?view=add-harvest"
+                       className="py-2 text-harvest-text font-medium flex items-center gap-2"
+                       onClick={() => setIsMenuOpen(false)}
+                    >
+                       <LayoutDashboard size={18} /> Add Product
+                    </Link>
+                  </>
+                )}
+
                 <Link
                   to="/profile"
                   className="py-2 text-harvest-text font-medium flex items-center gap-2"
