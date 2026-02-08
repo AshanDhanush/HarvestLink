@@ -19,9 +19,11 @@ import {
   MapPin,
   Lock,
   Leaf,
+  Store,
 } from "lucide-react";
 import logo from "../../assets/Logo-L_1@0.75x.png";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import orderService from "../../services/orderService";
 
 // --- Colors ---
 const colors = {
@@ -35,7 +37,8 @@ const colors = {
 const Sidebar = ({ currentView, setCurrentView, isOpen, setIsOpen }) => {
   const navItems = [
     { id: "overview", icon: <LayoutDashboard size={20} />, label: "Overview" },
-    { id: "add-harvest", icon: <Package size={20} />, label: "Add Harvest" },
+    { id: "my-products", icon: <ShoppingBag size={20} />, label: "My Products" },
+    { id: "add-product", icon: <Plus size={20} />, label: "Add Product" },
     { id: "profile", icon: <User size={20} />, label: "Profile Settings" },
     {
       id: "change-password",
@@ -129,6 +132,10 @@ const Header = ({ user, isProfileOpen, setIsProfileOpen, toggleSidebar }) => (
     </button>
 
     <div className="flex items-center gap-6 ml-auto">
+      <Link to="/shop" className="hidden md:flex items-center gap-2 text-gray-600 hover:text-green-700 font-medium transition mr-4">
+        <Store size={20} />
+        <span>Back to Shop</span>
+      </Link>
       <div className="relative">
         <button className="relative p-2 text-gray-600 hover:text-green-800 transition">
           <Bell size={20} />
@@ -183,45 +190,368 @@ const Header = ({ user, isProfileOpen, setIsProfileOpen, toggleSidebar }) => (
 
 // --- Views ---
 
-const Overview = ({ user }) => (
-  <div className="space-y-6">
-    <div className="bg-gradient-to-r from-green-800 to-green-600 rounded-2xl p-8 text-white shadow-lg">
-      <h1 className="text-3xl font-bold mb-2">
-        Welcome back, {user?.firstName}!
-      </h1>
-      <p className="text-green-100">
-        Manage your harvest, track sales, and update your profile all in one
-        place.
-      </p>
-    </div>
+const Overview = ({ user, setCurrentView }) => {
+  const [stats, setStats] = useState({
+    products: 0,
+    orders: 0,
+    revenue: 0,
+    rating: 4.8, // Mocked for now
+  });
+  const [topProducts, setTopProducts] = useState([]);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition">
-        <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mb-4 text-green-600">
-          <Package size={24} />
-        </div>
-        <h3 className="text-2xl font-bold text-gray-800">12</h3>
-        <p className="text-gray-500 text-sm">Active Listings</p>
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // 1. Fetch Products (Critical)
+        try {
+          const products = await productService.getAllProducts();
+          // Filter for current user (Case-insensitive)
+          const myProducts = products.filter((p) => {
+             const pName = (p.farmerName || "").toLowerCase().trim();
+             const uName = (user?.firstName || "").toLowerCase().trim();
+             const uEmail = (user?.email || "").toLowerCase().trim();
+             return pName === uName || pName === uEmail; 
+          });
+
+          setStats(prev => ({ ...prev, products: myProducts.length }));
+        } catch (e) {
+          console.error("Error fetching products:", e);
+        }
+
+        // 2. Fetch Orders
+        try {
+          const orders = await orderService.getOrders();
+          setStats(prev => ({ ...prev, orders: orders.length })); // simplified logic
+          setRecentOrders(orders.slice(0, 5));
+        } catch (e) {
+           console.error("Error fetching orders:", e);
+        }
+
+        // 3. Fetch Top Selling
+        try {
+          const topSelling = await orderService.getTopSellingProducts();
+          setTopProducts(topSelling.slice(0, 4));
+        } catch (e) {
+           console.error("Error fetching top selling:", e);
+        }
+
+      } catch (error) {
+        console.error("Error loading dashboard data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700"></div>
       </div>
-      <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition">
-        <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mb-4 text-blue-600">
-          <ShoppingBag size={24} />
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Welcome Banner */}
+      <div className="bg-gradient-to-r from-green-800 to-green-600 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
+        <div className="relative z-10">
+          <h1 className="text-3xl font-bold mb-2">
+            Welcome back, {user?.firstName}!
+          </h1>
+          <p className="text-green-100 max-w-xl">
+            Here's what's happening with your harvest today. You have {stats.orders} new orders to process.
+          </p>
+          <button 
+            onClick={() => setCurrentView('add-product')}
+            className="mt-6 bg-white text-green-800 px-6 py-2 rounded-lg font-bold hover:bg-green-50 transition shadow-sm flex items-center gap-2"
+          >
+            <Plus size={18} /> Add New Product
+          </button>
         </div>
-        <h3 className="text-2xl font-bold text-gray-800">24</h3>
-        <p className="text-gray-500 text-sm">Orders Completed</p>
+        <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-10 translate-y-10">
+          <Leaf size={200} />
+        </div>
       </div>
-      <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition">
-        <div className="h-12 w-12 bg-orange-100 rounded-full flex items-center justify-center mb-4 text-orange-600">
-          <Leaf size={24} />
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition">
+          <div className="flex justify-between items-start mb-4">
+            <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+              <Package size={24} />
+            </div>
+            <span className="text-green-600 bg-green-50 px-2 py-1 rounded text-xs font-bold">+2 new</span>
+          </div>
+          <h3 className="text-3xl font-bold text-gray-800 mb-1">{stats.products}</h3>
+          <p className="text-gray-500 text-sm font-medium">Active Products</p>
         </div>
-        <h3 className="text-2xl font-bold text-gray-800">4.8</h3>
-        <p className="text-gray-500 text-sm">Average Rating</p>
+
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition">
+          <div className="flex justify-between items-start mb-4">
+            <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+              <ShoppingBag size={24} />
+            </div>
+            <span className="text-blue-600 bg-blue-50 px-2 py-1 rounded text-xs font-bold">12 pending</span>
+          </div>
+          <h3 className="text-3xl font-bold text-gray-800 mb-1">{stats.orders}</h3>
+          <p className="text-gray-500 text-sm font-medium">Total Orders</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition">
+          <div className="flex justify-between items-start mb-4">
+            <div className="h-12 w-12 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
+              <Leaf size={24} />
+            </div>
+            <span className="text-gray-400 text-xs">Last 30 days</span>
+          </div>
+          <h3 className="text-3xl font-bold text-gray-800 mb-1">{stats.rating}</h3>
+          <p className="text-gray-500 text-sm font-medium">Average Rating</p>
+        </div>
+        
+         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition">
+          <div className="flex justify-between items-start mb-4">
+            <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
+              <ShoppingBag size={24} />
+            </div>
+             <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded text-xs font-bold">Total</span>
+          </div>
+          <h3 className="text-3xl font-bold text-gray-800 mb-1">LKR {stats.revenue}</h3>
+          <p className="text-gray-500 text-sm font-medium">Total Revenue</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Recent Orders */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+            <h3 className="text-lg font-bold text-gray-800">Recent Orders</h3>
+            <button className="text-green-700 text-sm font-bold hover:underline">View All</button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Order ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Customer</th>
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Status</th>
+                  <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wide">Amount</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {recentOrders.length > 0 ? (
+                  recentOrders.map((order) => (
+                    <tr key={order.id || Math.random()} className="hover:bg-gray-50 transition">
+                      <td className="px-6 py-4 text-sm font-bold text-gray-800">#{order.id ? order.id.substring(0, 6) : '---'}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{order.customerName || "Customer"}</td>
+                      <td className="px-6 py-4">
+                        <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">
+                          {order.status || "Pending"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm font-bold text-gray-800 text-right">
+                        LKR {order.totalAmount || "0.00"}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                   <tr>
+                    <td colSpan="4" className="px-6 py-8 text-center text-gray-500 text-sm">
+                      No orders found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Top Products */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+            <h3 className="text-lg font-bold text-gray-800">Top Selling Products</h3>
+            <button className="text-green-700 text-sm font-bold hover:underline">View Reports</button>
+          </div>
+           <div className="p-6 space-y-6">
+            {topProducts.length > 0 ? (
+              topProducts.map((product, index) => (
+                <div key={index} className="flex items-center gap-4">
+                  <div className="h-16 w-16 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
+                    {/* Placeholder for product image if available in DTO */}
+                    <div className="h-full w-full bg-green-100 flex items-center justify-center text-green-600">
+                      <Package size={24} />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-gray-800">{product.productName}</h4>
+                    <p className="text-sm text-gray-500">{product.category || "Category"}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-gray-800">LKR {product.price} / Kg</p>
+                    <p className="text-xs text-green-600 font-bold">{product.totalSold} sold</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+               <div className="text-center text-gray-500 py-8">No top products data available.</div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
-const AddHarvestView = ({ user }) => {
+const MyProductsView = ({ user, onEdit, onViewChange }) => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const allProducts = await productService.getAllProducts();
+        // Filter for current user (Frontend filtering)
+        const myProducts = allProducts.filter((p) => {
+             const pName = (p.farmerName || "").toLowerCase().trim();
+             const uName = (user?.firstName || "").toLowerCase().trim();
+             const uEmail = (user?.email || "").toLowerCase().trim();
+             return pName === uName || pName === uEmail; 
+        });
+      setProducts(myProducts);
+    } catch (error) {
+      console.error("Error fetching products", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchProducts();
+    }
+  }, [user]);
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      try {
+        await productService.deleteProduct(id);
+        setProducts(products.filter(p => p.id !== id));
+        alert("Product deleted successfully.");
+      } catch (error) {
+        console.error("Error deleting product", error);
+        alert("Failed to delete product.");
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          <ShoppingBag size={24} className="text-green-600" />
+          My Products
+        </h2>
+        <button
+          onClick={() => onViewChange("add-product")}
+          className="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition font-bold flex items-center gap-2"
+        >
+          <Plus size={18} /> Add New Product
+        </button>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">ID</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Product</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Category</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Price (per Kg)</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Stock</th>
+                <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wide">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {loading ? (
+                 <tr><td colSpan="6" className="p-8 text-center text-gray-500">Loading products...</td></tr>
+              ) : products.length > 0 ? (
+                products.map((product) => (
+                  <tr key={product.id} className="hover:bg-gray-50 transition">
+                    <td className="px-6 py-4 text-sm font-bold text-gray-800">
+                      {product.id}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                           {/* Placeholder image logic */}
+                           <Package size={20} />
+                        </div>
+                        <span className="font-bold text-gray-800">{product.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600 bg-opacity-50">
+                      <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-bold">
+                        {product.category}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-gray-800">
+                      LKR {product.price}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {product.quantity} Kg
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => onEdit(product)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                          title="Edit"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(product.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                          title="Delete"
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                    <div className="flex flex-col items-center gap-2">
+                      <Package size={48} className="text-gray-300" />
+                      <p>You haven't added any products yet.</p>
+                      <button 
+                        onClick={() => onViewChange("add-product")}
+                        className="text-green-700 font-bold hover:underline"
+                      >
+                        Add your first product
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AddProductView = ({ user, productToEdit, onProductSaved }) => {
   const [productData, setProductData] = useState({
     name: "",
     category: "",
@@ -237,6 +567,23 @@ const AddHarvestView = ({ user }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (productToEdit) {
+      setProductData({
+        name: productToEdit.name || "",
+        category: productToEdit.category || "",
+        farmerName: productToEdit.farmerName || user?.firstName || "",
+        location: productToEdit.location || user?.address || "",
+        description: productToEdit.description || "",
+        price: productToEdit.price || "",
+        quantity: productToEdit.quantity || "",
+        expiryDate: productToEdit.expiryDate ? new Date(productToEdit.expiryDate).toISOString().split('T')[0] : "",
+      });
+      // Handle image preview if URL exists (assuming backend might return image URL or base64)
+      // For now, we reset image/preview unless we have a clear way to show existing image
+    }
+  }, [productToEdit, user]);
 
   const handleChange = (e) => {
     setProductData({ ...productData, [e.target.name]: e.target.value });
@@ -260,22 +607,30 @@ const AddHarvestView = ({ user }) => {
     setMessage("");
 
     try {
-      await productService.createProduct(productData, image);
-      setMessage("Product created successfully!");
-      setProductData({
-        name: "",
-        category: "",
-        farmerName: user?.firstName || "",
-        location: user?.address || "",
-        description: "",
-        price: "",
-        quantity: "",
-        expiryDate: "",
-      });
-      setImage(null);
-      setPreview(null);
+      if (productToEdit) {
+        // Update logic
+        await productService.updateProduct(productToEdit.id, productData);
+        setMessage("Product updated successfully!");
+        onProductSaved(); 
+      } else {
+        // Create logic
+        await productService.createProduct(productData, image);
+        setMessage("Product created successfully!");
+        setProductData({
+          name: "",
+          category: "",
+          farmerName: user?.firstName || "",
+          location: user?.address || "",
+          description: "",
+          price: "",
+          quantity: "",
+          expiryDate: "",
+        });
+        setImage(null);
+        setPreview(null);
+      }
     } catch (error) {
-      setMessage("Error creating product. Please try again.");
+      setMessage(`Error ${productToEdit ? "updating" : "creating"} product. Please try again.`);
       console.error(error);
     } finally {
       setLoading(false);
@@ -285,8 +640,8 @@ const AddHarvestView = ({ user }) => {
   return (
     <div className="max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
-        <Plus size={24} className="text-green-600" />
-        Add New Harvest
+        {productToEdit ? <Edit size={24} className="text-blue-600" /> : <Plus size={24} className="text-green-600" />}
+        {productToEdit ? "Edit Product" : "Add New Harvest"}
       </h2>
 
       {message && (
@@ -358,9 +713,12 @@ const AddHarvestView = ({ user }) => {
                 className="hidden"
                 onChange={handleImageChange}
                 accept="image/*"
-                required={!preview}
+                required={!preview && !productToEdit} // Not required if editing (might keep old image)
               />
             </div>
+            {productToEdit && !preview && (
+                 <p className="text-xs text-gray-500 mt-2 text-center">Leave empty to keep existing image</p>
+            )}
           </div>
 
           {/* Right Column: Form Fields */}
@@ -401,7 +759,7 @@ const AddHarvestView = ({ user }) => {
 
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Price (LKR)
+                  Price (LKR per Kg)
                 </label>
                 <input
                   type="number"
@@ -441,7 +799,7 @@ const AddHarvestView = ({ user }) => {
                   value={productData.farmerName}
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-green-500 focus:bg-white focus:ring-0 transition font-medium"
-                  readOnly // Assumption: Farmer name is auto-filled and read-only usually, but can be editable if needed
+                  readOnly 
                 />
               </div>
 
@@ -501,10 +859,10 @@ const AddHarvestView = ({ user }) => {
           <button
             type="submit"
             disabled={loading}
-            className="bg-green-700 text-white py-3 px-8 rounded-lg hover:bg-green-800 transition shadow-lg shadow-green-200 font-bold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`text-white py-3 px-8 rounded-lg transition shadow-lg font-bold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${productToEdit ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200' : 'bg-green-700 hover:bg-green-800 shadow-green-200'}`}
           >
-            {loading ? "Publishing..." : "Publish Product"}
-            {!loading && <Leaf size={18} />}
+            {loading ? "Saving..." : (productToEdit ? "Update Product" : "Publish Product")}
+            {!loading && (productToEdit ? <Edit size={18} /> : <Leaf size={18} />)}
           </button>
         </div>
       </form>
@@ -761,15 +1119,28 @@ const ChangePasswordView = () => {
 // --- Main Layout ---
 const FarmerDashboard = () => {
   const [searchParams] = useSearchParams();
+  const viewParam = searchParams.get("view");
+
+  useEffect(() => {
+    if (viewParam) {
+      setCurrentView(viewParam);
+    }
+  }, [viewParam]);
   const [currentView, setCurrentView] = useState("overview");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [user, setUser] = useState(null);
 
+  const [editingProduct, setEditingProduct] = useState(null);
+
   useEffect(() => {
     const view = searchParams.get("view");
     if (view) {
       setCurrentView(view);
+      // Clear editing state when view changes from URL
+      if (view !== 'add-product') {
+        setEditingProduct(null);
+      }
     }
   }, [searchParams]);
 
@@ -778,18 +1149,32 @@ const FarmerDashboard = () => {
     setUser(currentUser);
   }, []);
 
+  const handleEditProduct = (product) => {
+    setEditingProduct(product);
+    setCurrentView('add-product');
+  };
+
+  const handleViewChange = (view) => {
+    setCurrentView(view);
+    if (view === 'add-product') {
+        setEditingProduct(null); // Clear editing if manually adding new
+    }
+  };
+
   const renderContent = () => {
     switch (currentView) {
       case "overview":
-        return <Overview user={user} />;
-      case "add-harvest":
-        return <AddHarvestView user={user} />;
+        return <Overview user={user} setCurrentView={handleViewChange} />;
+      case "my-products":
+        return <MyProductsView user={user} onEdit={handleEditProduct} onViewChange={handleViewChange} />;
+      case "add-product":
+        return <AddProductView user={user} productToEdit={editingProduct} onProductSaved={() => setCurrentView('my-products')} />;
       case "profile":
         return <ProfileView user={user} />;
       case "change-password":
         return <ChangePasswordView />;
       default:
-        return <Overview user={user} />;
+        return <Overview user={user} setCurrentView={handleViewChange} />;
     }
   };
 

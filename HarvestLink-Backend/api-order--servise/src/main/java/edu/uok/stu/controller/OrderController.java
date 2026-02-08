@@ -1,6 +1,5 @@
 package edu.uok.stu.controller;
 
-
 import edu.uok.stu.model.dto.OrderDetailsDto;
 import edu.uok.stu.model.dto.OrderRequestDto;
 import edu.uok.stu.model.dto.OrderResponse;
@@ -18,6 +17,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/order")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class OrderController {
 
     @Autowired
@@ -25,25 +25,24 @@ public class OrderController {
 
     @PostMapping("add/order")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> addOrder(@RequestBody OrderRequestDto orderRequestDto){
+    public ResponseEntity<?> addOrder(@RequestBody OrderRequestDto orderRequestDto) {
         return ResponseEntity.ok(orderService.addOrder(orderRequestDto));
     }
 
     @GetMapping("get/Orders")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<OrderResponse> getOrders(){
+    public List<OrderResponse> getOrders() {
         return orderService.getOrders();
     }
+
     @GetMapping("get/revenue")
     public ResponseEntity<Map<String, Object>> getMonthlyAnalytics() {
         return ResponseEntity.ok(orderService.getMonthlyRevenueAnalytics());
     }
 
     @GetMapping("get/topsellingproducts")
-    public List<TopSellingProductDto> getTopSellingProducts(){
+    public List<TopSellingProductDto> getTopSellingProducts() {
         return orderService.getTopSellingProducts();
     }
-
-
 
 }

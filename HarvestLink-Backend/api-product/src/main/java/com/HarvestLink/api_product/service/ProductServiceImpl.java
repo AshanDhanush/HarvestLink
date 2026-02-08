@@ -49,7 +49,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void updateProduct(String id, ProductRequest productRequest) {
-        Product existingProduct = productRepository.findById(id)
+        Product existingProduct = productRepository.findByTempID(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
         existingProduct.setName(productRequest.getName());
@@ -96,7 +96,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse getProductById(String id) {
-        Product product = productRepository.findById(id).orElseThrow();
+        Product product = productRepository.findByTempID(id).orElseThrow();
         return mapToProductResponse(product);
     }
 

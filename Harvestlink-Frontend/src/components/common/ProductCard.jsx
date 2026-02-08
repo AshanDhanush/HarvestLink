@@ -39,7 +39,7 @@ const ProductCard = ({ image, title, soldPercentage, price, unit, farmerName, lo
 
         <div className="flex items-center justify-center gap-1 mb-4">
           <span className="text-lg font-bold text-gray-900">LKR {price}</span>
-          <span className="text-xs text-gray-400 font-medium">PER {unit || 'Kg'}</span>
+          <span className="text-xs text-gray-400 font-medium">PER 1KG</span>
         </div>
 
         <button className="px-8 py-2 border-2 border-gray-300 text-gray-600 font-bold rounded-full hover:border-harvest-primary hover:text-harvest-primary hover:bg-white transition-colors text-sm">
