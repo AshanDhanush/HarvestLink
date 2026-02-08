@@ -10,6 +10,7 @@ import {
   ChevronDown,
   LogOut,
   Settings,
+  LayoutDashboard,
 } from "lucide-react";
 import logo from "../../assets/Logo-L_1@0.75x.png";
 import authService from "../../services/authService";
@@ -134,22 +135,53 @@ const NavBar = () => {
                       <p className="text-xs text-gray-500 truncate">
                         {user.email}
                       </p>
+
                     </div>
 
-                    <Link
-                      to="/profile"
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-harvest-primary transition"
-                      onClick={() => setIsProfileOpen(false)}
-                    >
-                      <User size={16} /> Profile
-                    </Link>
-                    <Link
-                      to="/settings"
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-harvest-primary transition"
-                      onClick={() => setIsProfileOpen(false)}
-                    >
-                      <Settings size={16} /> Settings
-                    </Link>
+
+
+                    {(user.role === 'FARMER' || user.role === 'Farmer') ? (
+                      <>
+                        <Link
+                          to="/farmer/dashboard"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-harvest-primary transition"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          <LayoutDashboard size={16} /> Dashboard
+                        </Link>
+                        <Link
+                          to="/farmer/dashboard?view=add-harvest"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-harvest-primary transition"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          <LayoutDashboard size={16} /> Add Product
+                        </Link>
+                        <Link
+                           to="/farmer/dashboard?view=profile"
+                           className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-harvest-primary transition"
+                           onClick={() => setIsProfileOpen(false)}
+                         >
+                           <User size={16} /> Profile
+                         </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                           to="/orders"
+                           className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-harvest-primary transition"
+                           onClick={() => setIsProfileOpen(false)}
+                         >
+                           <ShoppingCart size={16} /> Orders
+                         </Link>
+                        <Link
+                           to="/profile"
+                           className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-harvest-primary transition"
+                           onClick={() => setIsProfileOpen(false)}
+                         >
+                           <User size={16} /> Profile
+                         </Link>
+                      </>
+                    )}
 
                     <div className="border-t border-gray-100 my-1"></div>
 
@@ -210,18 +242,53 @@ const NavBar = () => {
             {/* Mobile Menu User Options */}
             {user ? (
               <>
-                <Link
-                  to="/profile"
-                  className="py-2 text-harvest-text font-medium flex items-center gap-2"
-                >
-                  <User size={18} /> Profile
-                </Link>
-                <Link
-                  to="/settings"
-                  className="py-2 text-harvest-text font-medium flex items-center gap-2"
-                >
-                  <Settings size={18} /> Settings
-                </Link>
+                <div className="border-b border-gray-100 pb-2 mb-2">
+                  <p className="px-2 text-sm font-semibold text-gray-800">{user.firstName || user.name || "User"}</p>
+                  <p className="px-2 text-xs text-gray-500">{user.email}</p>
+                </div>
+
+                {(user.role === 'FARMER' || user.role === 'Farmer') ? (
+                  <>
+                    <Link
+                       to="/farmer/dashboard"
+                       className="py-2 text-harvest-text font-medium flex items-center gap-2"
+                       onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard size={18} /> Dashboard
+                    </Link>
+                    <Link
+                       to="/farmer/dashboard?view=add-harvest"
+                       className="py-2 text-harvest-text font-medium flex items-center gap-2"
+                       onClick={() => setIsMenuOpen(false)}
+                    >
+                       <LayoutDashboard size={18} /> Add Product
+                    </Link>
+                    <Link
+                       to="/farmer/dashboard?view=profile"
+                       className="py-2 text-harvest-text font-medium flex items-center gap-2"
+                       onClick={() => setIsMenuOpen(false)}
+                    >
+                      <User size={18} /> Profile
+                    </Link>
+                  </>
+                ) : (
+                   <>
+                    <Link
+                       to="/orders"
+                       className="py-2 text-harvest-text font-medium flex items-center gap-2"
+                       onClick={() => setIsMenuOpen(false)}
+                    >
+                      <ShoppingCart size={18} /> Orders
+                    </Link>
+                    <Link
+                       to="/profile"
+                       className="py-2 text-harvest-text font-medium flex items-center gap-2"
+                       onClick={() => setIsMenuOpen(false)}
+                    >
+                      <User size={18} /> Profile
+                    </Link>
+                   </>
+                )}
                 <button
                   onClick={handleLogout}
                   className="py-2 text-red-600 font-medium flex items-center gap-2 text-left"

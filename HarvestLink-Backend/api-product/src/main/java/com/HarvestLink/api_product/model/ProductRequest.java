@@ -12,7 +12,11 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class ProductRequest {
     private String name;
+    private String category;
+    private String farmerName;
+    private String location;
     private String description;
     private BigDecimal price;
     private Integer quantity;
+    private java.time.LocalDate expiryDate;
 }

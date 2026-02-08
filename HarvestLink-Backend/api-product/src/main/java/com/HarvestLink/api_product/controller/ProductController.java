@@ -6,12 +6,14 @@ import com.HarvestLink.api_product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/product")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class ProductController {
 
     private final ProductService productService;
@@ -19,8 +21,9 @@ public class ProductController {
     // CREATE - HTTP POST
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createProduct(@RequestBody ProductRequest productRequest) {
-        productService.createProduct(productRequest);
+    public void createProduct(@RequestPart("product") ProductRequest productRequest,
+            @RequestPart("image") MultipartFile image) {
+        productService.createProduct(productRequest, image);
     }
 
     // READ All - HTTP GET
