@@ -4,7 +4,9 @@ import TopBar from "../../components/layout/Topbar";
 import NavBar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import ProductCard from "../../components/common/ProductCard";
-import { Search } from "lucide-react";
+// 1. Import the AI Component 👇
+import PredictForm from "../../components/common/PredictForm";
+import { Search, X } from "lucide-react";
 
 // Placeholder for map - in real app would use Google Maps or Leaflet
 const MapPlaceholder = () => (
@@ -23,6 +25,8 @@ const MapPlaceholder = () => (
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                     <span className="text-4xl scale-125">📍</span>
                 </div>
+
+
                 <div className="absolute bottom-1/3 right-1/4 transform -translate-x-1/2 -translate-y-1/2">
                     <span className="text-4xl">📍</span>
                 </div>
