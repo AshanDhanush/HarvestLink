@@ -20,5 +20,11 @@ public interface ProductService {
 
     boolean deleteProduct(String id);
 
+    List<ProductResponse> getLatestProducts();
+
+    List<ProductResponse> getTopRatedProducts();
+
+    List<ProductResponse> getPopularProducts();
+
     // void updateProductStock(List<OrderItems> orderItems);
 }
