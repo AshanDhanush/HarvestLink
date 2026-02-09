@@ -5,11 +5,11 @@ import TopBar from "../../components/layout/Topbar";
 import NavBar from "../../components/layout/NavBar";
 import Footer from "../../components/layout/Footer";
 import ProductCard from "../../components/common/ProductCard";
-// 1. Import the AI Component 👇
+
 import PredictForm from "../../components/common/PredictForm";
 import { Search, X } from "lucide-react";
 
-// Placeholder for map - in real app would use Google Maps or Leaflet
+
 const MapPlaceholder = () => (
   <div className="hidden w-full h-[400px] bg-gray-200 rounded-3xl overflow-hidden relative mb-12">
     <img
