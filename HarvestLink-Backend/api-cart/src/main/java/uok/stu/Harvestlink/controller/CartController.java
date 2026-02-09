@@ -36,7 +36,7 @@ public class CartController {
     @ResponseStatus(HttpStatus.OK)
     public Cart removeItemFromCart(@PathVariable String userId,
                                    @PathVariable String productId) {
-        
+
         return cartService.removeFromCart(userId, productId);
     }
 }

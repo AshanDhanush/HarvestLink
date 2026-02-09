@@ -20,7 +20,7 @@ const ProductDetail = () => {
 
     const { addToCart } = useCart();
 
-    // Rating State
+    
     const [reviews, setReviews] = useState([]);
     const [averageRating, setAverageRating] = useState(0);
     const [userRating, setUserRating] = useState(0);
