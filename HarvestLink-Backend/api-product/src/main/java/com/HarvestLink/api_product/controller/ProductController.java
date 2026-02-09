@@ -40,14 +40,14 @@ public class ProductController {
         return productService.getProductById(id);
     }
 
-    
+
     @PutMapping("/update/by/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateProduct(@PathVariable String id, @RequestBody ProductRequest productRequest) {
         productService.updateProduct(id, productRequest);
     }
 
-    // DELETE - HTTP DELETE
+    
     @DeleteMapping("/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProduct(@PathVariable String id) {
