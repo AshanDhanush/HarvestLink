@@ -118,7 +118,7 @@ const Login = () => {
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <label className="text-xs font-medium text-gray-700">Password</label>
-                <Link to="/forgot-password" class="text-xs font-semibold text-harvest-primary hover:underline">
+                <Link to="/forgot-password" class="hidden text-xs font-semibold text-harvest-primary hover:underline">
                   Forgot password?
                 </Link>
               </div>
@@ -152,12 +152,12 @@ const Login = () => {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
               </div>
-              <div className="relative flex justify-center text-xs">
+              <div className="hidden relative flex justify-center text-xs">
                 <span className="px-2 bg-white text-gray-500">Or continue with</span>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-3">
+            <div className="hidden grid grid-cols-2 gap-3">
               <button type="button" className="flex items-center justify-center gap-2 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition font-medium text-gray-700 bg-white text-sm">
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
