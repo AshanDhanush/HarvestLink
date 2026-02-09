@@ -16,7 +16,7 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    
+
     @GetMapping("/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public Cart getCart(@PathVariable String userId) {
@@ -36,7 +36,7 @@ public class CartController {
     @ResponseStatus(HttpStatus.OK)
     public Cart removeItemFromCart(@PathVariable String userId,
                                    @PathVariable String productId) {
-        // Implementation left as exercise, currently throws UnsupportedOperationException
+        
         return cartService.removeFromCart(userId, productId);
     }
 }
