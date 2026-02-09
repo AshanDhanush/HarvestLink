@@ -40,7 +40,7 @@ public class ProductController {
         return productService.getProductById(id);
     }
 
-    // UPDATE - HTTP PUT
+    
     @PutMapping("/update/by/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateProduct(@PathVariable String id, @RequestBody ProductRequest productRequest) {
