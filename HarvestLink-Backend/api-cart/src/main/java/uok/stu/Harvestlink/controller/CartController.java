@@ -16,7 +16,7 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    // GET /api/cart/{userId} - Retrieves the current cart for a user
+    
     @GetMapping("/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public Cart getCart(@PathVariable String userId) {
