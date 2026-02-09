@@ -10,7 +10,7 @@ import { useState, useEffect } from "react";
 
 const ProductCard = ({ id, image, title, soldPercentage, price, unit, farmerName, location, category }) => {
   const calculateStart = (id) => {
-    // This is a placeholder
+    
   }
   
   const navigate = useNavigate();
@@ -18,7 +18,8 @@ const ProductCard = ({ id, image, title, soldPercentage, price, unit, farmerName
   const { isInWishlist, addToWishlistContext, removeFromWishlistContext } = useWishlist();
   const [rating, setRating] = useState(0);
   
-  // Use context for favorite state instead of local state fetching
+  
+  
   const isFavorite = isInWishlist(id);
 
   useEffect(() => {
@@ -32,7 +33,7 @@ const ProductCard = ({ id, image, title, soldPercentage, price, unit, farmerName
            }
         }
       } catch (e) {
-        // ignore errors
+       
       }
     };
     fetchData();
