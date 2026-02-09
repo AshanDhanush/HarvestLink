@@ -1,17 +1,17 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import wishlistService from '../services/wishlistService';
-import authService from '../services/authService';
+import { useAuth } from './AuthContext';
 
 const WishlistContext = createContext();
 
 export const useWishlist = () => useContext(WishlistContext);
 
 export const WishlistProvider = ({ children }) => {
+    const { user } = useAuth();
     const [wishlistCount, setWishlistCount] = useState(0);
     const [wishlistItems, setWishlistItems] = useState([]);
 
     const fetchWishlist = async () => {
-        const user = authService.getCurrentUser();
         if (user) {
             try {
                 const items = await wishlistService.getWishlist();
@@ -28,7 +28,7 @@ export const WishlistProvider = ({ children }) => {
 
     useEffect(() => {
         fetchWishlist();
-    }, []);
+    }, [user]);
 
     const addToWishlistContext = async (product) => {
         await wishlistService.addToWishlist(product);
