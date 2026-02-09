@@ -19,7 +19,7 @@ public class ApplicationConfig {
 
     private final UserRepository userRepository;
 
-    // Load user details by email
+    
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> userRepository.findByEmail(username)
