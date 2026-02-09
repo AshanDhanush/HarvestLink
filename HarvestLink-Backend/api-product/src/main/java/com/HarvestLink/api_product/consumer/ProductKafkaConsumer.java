@@ -22,7 +22,7 @@ public class ProductKafkaConsumer {
     public void consumeCommand(ProductRequest request) {
         log.info("Received new product event from Kafka: {}", request);
 
-        // Call your internal service to save the product to MongoDB
+        
         productService.createProduct(request);
 
         log.info("Product processed successfully.");
