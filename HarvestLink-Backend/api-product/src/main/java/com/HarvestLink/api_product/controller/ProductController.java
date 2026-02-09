@@ -26,14 +26,14 @@ public class ProductController {
         productService.createProduct(productRequest, image);
     }
 
-    
+
     @GetMapping("getAll")
     @ResponseStatus(HttpStatus.OK)
     public List<ProductResponse> getAllProducts() {
         return productService.getAllProducts();
     }
 
-    // READ by ID - HTTP GET
+
     @GetMapping("/getby/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ProductResponse getProductById(@PathVariable String id) {
