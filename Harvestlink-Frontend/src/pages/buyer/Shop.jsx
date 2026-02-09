@@ -62,7 +62,7 @@ const Shop = () => {
         fetchProducts();
     }, []);
 
-    // Filter products when parameters or allProducts change
+    
     useEffect(() => {
         const categoryParam = searchParams.get("category");
         const searchParam = searchParams.get("search");
