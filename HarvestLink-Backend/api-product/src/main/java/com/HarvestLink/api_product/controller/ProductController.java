@@ -26,7 +26,7 @@ public class ProductController {
         productService.createProduct(productRequest, image);
     }
 
-    // READ All - HTTP GET
+    
     @GetMapping("getAll")
     @ResponseStatus(HttpStatus.OK)
     public List<ProductResponse> getAllProducts() {

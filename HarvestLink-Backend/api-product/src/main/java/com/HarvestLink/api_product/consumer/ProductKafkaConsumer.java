@@ -22,7 +22,7 @@ public class ProductKafkaConsumer {
     public void consumeCommand(ProductRequest request) {
         log.info("Received new product event from Kafka: {}", request);
 
-        
+
         productService.createProduct(request);
 
         log.info("Product processed successfully.");
