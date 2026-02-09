@@ -1,18 +1,34 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-    const [cartItems, setCartItems] = useState(() => {
-        const localData = localStorage.getItem('harvestLink_cart');
-        return localData ? JSON.parse(localData) : [];
-    });
+    const { user } = useAuth();
+    const [cartItems, setCartItems] = useState([]);
 
+    // Calculate unique storage key based on user
+    const getStorageKey = (currentUser) => {
+        if (currentUser && currentUser.email) {
+            return `harvestLink_cart_${currentUser.email}`;
+        }
+        return 'harvestLink_cart_guest';
+    };
+
+    // Load cart when user changes
     useEffect(() => {
-        localStorage.setItem('harvestLink_cart', JSON.stringify(cartItems));
-    }, [cartItems]);
+        const key = getStorageKey(user);
+        const localData = localStorage.getItem(key);
+        setCartItems(localData ? JSON.parse(localData) : []);
+    }, [user]);
+
+    // Save cart when items change
+    useEffect(() => {
+        const key = getStorageKey(user);
+        localStorage.setItem(key, JSON.stringify(cartItems));
+    }, [cartItems, user]);
 
     const addToCart = (product, quantity = 1) => {
         setCartItems(prevItems => {
