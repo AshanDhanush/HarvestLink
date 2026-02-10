@@ -10,6 +10,7 @@ const DeliveryProductsTest = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    //use effect
     useEffect(() => {
         const fetchProducts = async () => {
             try {
