@@ -339,18 +339,6 @@ const StatsCard = ({ item }) => (
 
 // 4. Recent Orders Table
 const RecentOrdersTable = ({ orders = [], onViewAll }) => {
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "DELIVERED":
-      case "Delivered": return "bg-green-100 text-green-700";
-      case "PENDING":
-      case "Pending": return "bg-yellow-100 text-yellow-700";
-      case "PROCESSING":
-      case "Processing": return "bg-blue-100 text-blue-700";
-      default: return "bg-gray-100 text-gray-700";
-    }
-  };
-
   const displayOrders = orders && orders.length > 0 ? orders.slice(0, 5) : [];
 
   return (
@@ -369,7 +357,6 @@ const RecentOrdersTable = ({ orders = [], onViewAll }) => {
               <th className="px-6 py-4 font-bold">Customer</th>
               <th className="px-6 py-4 font-bold">Items</th>
               <th className="px-6 py-4 font-bold">Total</th>
-              <th className="px-6 py-4 font-bold">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -384,11 +371,6 @@ const RecentOrdersTable = ({ orders = [], onViewAll }) => {
                   <td className="px-6 py-4 text-gray-600">{order.customerName || order.customer || "N/A"}</td>
                   <td className="px-6 py-4 text-gray-600 max-w-xs truncate">{itemsDisplay}</td>
                   <td className="px-6 py-4 text-gray-800">LKR {order.totalPrice || order.total || "-"}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(order.status)}`}>
-                      {order.status || "PENDING"}
-                    </span>
-                  </td>
                 </tr>
               );
             })}

@@ -340,7 +340,6 @@ const Overview = ({ user, setCurrentView }) => {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Order ID</th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Customer</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Status</th>
                   <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wide">Amount</th>
                 </tr>
               </thead>
@@ -350,11 +349,6 @@ const Overview = ({ user, setCurrentView }) => {
                     <tr key={order.id || Math.random()} className="hover:bg-gray-50 transition">
                       <td className="px-6 py-4 text-sm font-bold text-gray-800">#{order.id ? order.id.substring(0, 6) : '---'}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{order.customerName || "Customer"}</td>
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">
-                          {order.status || "Pending"}
-                        </span>
-                      </td>
                       <td className="px-6 py-4 text-sm font-bold text-gray-800 text-right">
                         LKR {order.totalAmount || "0.00"}
                       </td>
@@ -362,7 +356,7 @@ const Overview = ({ user, setCurrentView }) => {
                   ))
                 ) : (
                    <tr>
-                    <td colSpan="4" className="px-6 py-8 text-center text-gray-500 text-sm">
+                    <td colSpan="3" className="px-6 py-8 text-center text-gray-500 text-sm">
                       No orders found.
                     </td>
                   </tr>

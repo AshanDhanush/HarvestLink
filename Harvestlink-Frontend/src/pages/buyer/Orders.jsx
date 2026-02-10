@@ -108,9 +108,6 @@ const Orders = () => {
                         <Calendar size={16} />
                         <span>{order.date || new Date().toLocaleDateString()}</span> 
                       </div>
-                      <div className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold uppercase tracking-wide w-fit">
-                        {order.status || "Pending"}
-                      </div>
                     </div>
 
                     <hr className="border-gray-100 my-4" />
