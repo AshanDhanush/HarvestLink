@@ -20,16 +20,13 @@
         </processorPath>
         <module name="Harvestlink (2)" />
         <module name="Harvestlink" />
-        <module name="Harvestlink (1)" />
         <module name="api-product" />
+        <module name="Harvestlink (1)" />
       </profile>
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="Notification-service" />
-        <module name="api-order--servise" />
-        <module name="api-gateway1" />
       </profile>
       <profile name="Annotation profile for api" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
