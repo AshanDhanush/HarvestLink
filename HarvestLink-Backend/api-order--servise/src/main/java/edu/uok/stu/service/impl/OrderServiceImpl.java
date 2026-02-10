@@ -1,6 +1,5 @@
 package edu.uok.stu.service.impl;
 
-
 import edu.uok.stu.model.dto.*;
 import edu.uok.stu.model.entity.OrderDetails;
 import edu.uok.stu.model.entity.OrderEntity;
@@ -21,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -36,62 +36,67 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private KafkaTemplate<?, ?> kafkaTemplate;
     @Autowired
-    private KafkaTemplate<Object,NotificationEvent>   kafkaTemplate1;
+    private KafkaTemplate<Object, NotificationEvent> kafkaTemplate1;
 
     @Override
     @Transactional
     public boolean addOrder(OrderRequestDto orderRequestDto) {
-        if(orderRequestDto == null){
+        if (orderRequestDto == null) {
             return false;
         }
-        OrderEntity orderEntity = new OrderEntity(null,orderRequestDto.getCustomerId(), LocalDate.now());
+        OrderEntity orderEntity = new OrderEntity(null, orderRequestDto.getCustomerId(), LocalDate.now());
 
-        try{
+        try {
             orderRepository.save(orderEntity);
 
-            OrderDetails orderDetails= mapToOrderDetails(orderRequestDto);
+            OrderDetails orderDetails = mapToOrderDetails(orderRequestDto);
             orderDetailsRepository.save(orderDetails);
-            // 🔹 BUILD INVOICE
-            System.out.println(orderRequestDto.getOrderDetails().getCustomerName());
-            System.out.println(orderRequestDto.getOrderDetails().getCustomerEmail());
-            String html = invoiceService.buildInvoiceHtml(
-                    orderRequestDto.getOrderDetails().getCustomerName(),
-                    orderRequestDto.getOrderDetails().getCustomerEmail(),
-                    orderRequestDto.getOrderDetails().getDeliveryAddress(),
-                    orderRequestDto.getOrderDetails().getOrderItems(),
-                    orderRequestDto.getOrderDetails().getDeliveryFees(),
-                    orderRequestDto.getOrderDetails().getTotalPrice(),
-                    orderRequestDto.getOrderDetails().getStatus()
-            );
 
-            // 🔹 GENERATE PDF
-            byte[] pdfBytes = invoiceService.generateInvoicePdf(html);
-            String pdfFileName = "Invoice_" + orderRequestDto.getOrderDetails().getCustomerName() + ".pdf";
+            // 🔹 SEND KAFKA NOTIFICATIONS (truly non-blocking - runs in background thread)
+            CompletableFuture.runAsync(() -> {
+                try {
+                    // 🔹 BUILD INVOICE
+                    String html = invoiceService.buildInvoiceHtml(
+                            orderRequestDto.getOrderDetails().getCustomerName(),
+                            orderRequestDto.getOrderDetails().getCustomerEmail(),
+                            orderRequestDto.getOrderDetails().getDeliveryAddress(),
+                            orderRequestDto.getOrderDetails().getOrderItems(),
+                            orderRequestDto.getOrderDetails().getDeliveryFees(),
+                            orderRequestDto.getOrderDetails().getTotalPrice(),
+                            orderRequestDto.getOrderDetails().getStatus());
 
-            // 🔹 PREPARE KAFKA NOTIFICATION EVENT
-            NotificationEvent notificationEvent = new NotificationEvent(
-                    orderRequestDto.getOrderDetails().getCustomerEmail(),
-                    "Order Confirmation & Invoice",
-                    "Thank you for your order! Please find your invoice attached.",
-                    pdfFileName,
-                    pdfBytes
-            );
+                    // 🔹 GENERATE PDF
+                    byte[] pdfBytes = invoiceService.generateInvoicePdf(html);
+                    String pdfFileName = "Invoice_" + orderRequestDto.getOrderDetails().getCustomerName() + ".pdf";
 
-            // 🔹 SEND TO KAFKA
-            kafkaTemplate1.send("invoice-topic", notificationEvent);
+                    // 🔹 PREPARE KAFKA NOTIFICATION EVENT
+                    NotificationEvent notificationEvent = new NotificationEvent(
+                            orderRequestDto.getOrderDetails().getCustomerEmail(),
+                            "Order Confirmation & Invoice",
+                            "Thank you for your order! Please find your invoice attached.",
+                            pdfFileName,
+                            pdfBytes);
 
-            for(OrderItemsDto orderItemsDto : orderDetails.getOrderItems()) {
-                Message<OrderItemsDto> message = MessageBuilder
+                    // 🔹 SEND TO KAFKA
+                    kafkaTemplate1.send("invoice-topic", notificationEvent);
 
-                        .withPayload(orderItemsDto)
-                        .setHeader(KafkaHeaders.TOPIC, "product-update1")
-                        .build();
-                kafkaTemplate.send(message);
-            }
+                    for (OrderItemsDto orderItemsDto : orderDetails.getOrderItems()) {
+                        Message<OrderItemsDto> message = MessageBuilder
+                                .withPayload(orderItemsDto)
+                                .setHeader(KafkaHeaders.TOPIC, "product-update1")
+                                .build();
+                        kafkaTemplate.send(message);
+                    }
+                } catch (Exception kafkaEx) {
+                    // Log warning but don't fail the order
+                    System.err.println(
+                            "⚠️ Kafka notification failed (order was saved successfully): " + kafkaEx.getMessage());
+                }
+            });
 
             return true;
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Failed to save order", e);
         }
     }
@@ -111,7 +116,6 @@ public class OrderServiceImpl implements OrderService {
                     .map(OrderItemsDto::getQuantity)
                     .toList();
 
-
             OrderResponse response = new OrderResponse(
                     o.getDisID(),
                     o.getCustomerName(),
@@ -122,8 +126,7 @@ public class OrderServiceImpl implements OrderService {
                     o.getTotalPrice(),
                     o.getDeliveryAddress(),
                     o.getStatus(),
-                    o.getDate().toString()
-            );
+                    o.getDate().toString());
 
             orderResponses.add(response);
         }
@@ -135,17 +138,15 @@ public class OrderServiceImpl implements OrderService {
     public Map<String, Object> getMonthlyRevenueAnalytics() {
         LocalDate now = LocalDate.now();
 
-
         LocalDate startCurrentMonth = now.withDayOfMonth(1);
         LocalDate endCurrentMonth = now.withDayOfMonth(now.lengthOfMonth());
 
         LocalDate startLastMonth = now.minusMonths(1).withDayOfMonth(1);
         LocalDate endLastMonth = now.minusMonths(1).withDayOfMonth(now.minusMonths(1).lengthOfMonth());
 
-
-        List<OrderDetails> currentMonthOrders = orderDetailsRepository.findByDateBetween(startCurrentMonth, endCurrentMonth);
+        List<OrderDetails> currentMonthOrders = orderDetailsRepository.findByDateBetween(startCurrentMonth,
+                endCurrentMonth);
         List<OrderDetails> lastMonthOrders = orderDetailsRepository.findByDateBetween(startLastMonth, endLastMonth);
-
 
         double currentMonthTotal = currentMonthOrders.stream()
                 .mapToDouble(OrderDetails::getTotalPrice)
@@ -155,14 +156,12 @@ public class OrderServiceImpl implements OrderService {
                 .mapToDouble(OrderDetails::getTotalPrice)
                 .sum();
 
-
         double percentageChange;
         if (lastMonthTotal == 0) {
             percentageChange = (currentMonthTotal > 0) ? 100.0 : 0.0;
         } else {
             percentageChange = ((currentMonthTotal - lastMonthTotal) / lastMonthTotal) * 100;
         }
-
 
         Map<String, Object> response = new HashMap<>();
         response.put("currentMonthTotal", currentMonthTotal);
@@ -179,7 +178,6 @@ public class OrderServiceImpl implements OrderService {
     public List<TopSellingProductDto> getTopSellingProducts() {
         return orderDetailsRepository.findTopSellingProduct();
     }
-
 
     private String generateTempId() {
         List<OrderDetails> orders = orderDetailsRepository.findAll();
@@ -207,7 +205,7 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private OrderDetails mapToOrderDetails(OrderRequestDto orderRequestDto){
+    private OrderDetails mapToOrderDetails(OrderRequestDto orderRequestDto) {
         OrderDetails orderDetails = new OrderDetails();
 
         orderDetails.setDisID(generateTempId());
@@ -222,7 +220,5 @@ public class OrderServiceImpl implements OrderService {
 
         return orderDetails;
     }
-
-
 
 }

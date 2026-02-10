@@ -1,14 +1,64 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
 import TopBar from '../../components/layout/Topbar';
 import NavBar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
-import { Trash2, Plus, Minus, ArrowLeft } from 'lucide-react';
+import DeliveryLocationPicker from '../../components/delivery/DeliveryLocationPicker';
+import { Trash2, Plus, Minus, ArrowLeft, Truck, MapPin, Package, Scale } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import deliveryService from '../../services/deliveryService';
 
 const Cart = () => {
     const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
     const navigate = useNavigate();
+
+    // Delivery fee state
+    const [deliveryFee, setDeliveryFee] = useState({
+        total: 0,
+        baseFee: 0,
+        distanceCost: 0,
+        weightCost: 0,
+        distanceKm: 0,
+        weightKg: 0,
+        extraDistance: 0,
+        extraWeight: 0
+    });
+    const [deliveryLocation, setDeliveryLocation] = useState(null);
+
+    // Calculate total weight
+    const getTotalWeight = () => {
+        return cartItems.reduce((total, item) => {
+            const weight = item.weight ? item.weight * item.quantity : item.quantity;
+            return total + weight;
+        }, 0);
+    };
+
+    // Handle delivery fee calculated
+    const handleDeliveryFeeCalculated = (breakdown) => {
+        setDeliveryFee(breakdown);
+        // Store in sessionStorage for checkout
+        sessionStorage.setItem('deliveryFee', JSON.stringify(breakdown));
+        sessionStorage.setItem('deliveryLocation', JSON.stringify(deliveryLocation));
+    };
+
+    // Handle location selected
+    const handleLocationSelected = (location) => {
+        setDeliveryLocation(location);
+    };
+
+    // Navigate to checkout with delivery data
+    const handleProceedToCheckout = () => {
+        if (!deliveryLocation) {
+            alert('Please select a delivery location first');
+            return;
+        }
+        sessionStorage.setItem('deliveryFee', JSON.stringify(deliveryFee));
+        sessionStorage.setItem('deliveryLocation', JSON.stringify(deliveryLocation));
+        navigate('/checkout');
+    };
+
+    const subtotal = getCartTotal();
+    const total = subtotal + deliveryFee.total;
 
     return (
         <div className="bg-gray-50 min-h-screen">
@@ -57,6 +107,12 @@ const Cart = () => {
                                     <div className="flex-1 text-center sm:text-left">
                                         <h3 className="text-lg font-bold text-gray-900">{item.name}</h3>
                                         <p className="text-sm text-gray-500 mb-1">{item.category}</p>
+                                        {item.location && (
+                                            <p className="text-xs text-gray-400 flex items-center gap-1 justify-center sm:justify-start">
+                                                <MapPin size={12} />
+                                                {item.location}
+                                            </p>
+                                        )}
                                         <div className="text-harvest-primary font-bold">LKR {item.price} / {item.unit}</div>
                                     </div>
 
@@ -96,6 +152,15 @@ const Cart = () => {
                             >
                                 <Trash2 size={16} /> Clear Cart
                             </button>
+
+                            {/* Delivery Location Picker */}
+                            <div className="mt-6">
+                                <DeliveryLocationPicker
+                                    cartItems={cartItems}
+                                    onDeliveryFeeCalculated={handleDeliveryFeeCalculated}
+                                    onLocationSelected={handleLocationSelected}
+                                />
+                            </div>
                         </div>
 
                         {/* Order Summary */}
@@ -104,25 +169,96 @@ const Cart = () => {
                                 <h2 className="text-xl font-bold text-gray-800 mb-6">Order Summary</h2>
 
                                 <div className="space-y-4 mb-6">
+                                    {/* Subtotal */}
                                     <div className="flex justify-between text-gray-600">
-                                        <span>Subtotal</span>
-                                        <span className="font-medium">LKR {getCartTotal()}</span>
+                                        <span className="flex items-center gap-2">
+                                            <Package size={16} />
+                                            Subtotal ({cartItems.length} items)
+                                        </span>
+                                        <span className="font-medium">LKR {subtotal.toLocaleString()}</span>
                                     </div>
-                                    <div className="flex justify-between text-gray-600">
-                                        <span>Delivery</span>
-                                        <span className="text-green-600 font-medium">Free</span>
+
+                                    {/* Weight Info */}
+                                    <div className="flex justify-between text-gray-500 text-sm">
+                                        <span className="flex items-center gap-2">
+                                            <Scale size={14} />
+                                            Total Weight
+                                        </span>
+                                        <span>{getTotalWeight()} kg</span>
                                     </div>
-                                    <div className="border-t border-gray-100 pt-4 flex justify-between items-end">
-                                        <span className="font-bold text-gray-800">Total</span>
-                                        <span className="text-2xl font-bold text-harvest-dark">LKR {getCartTotal()}</span>
+
+                                    {/* Delivery Fee Breakdown */}
+                                    <div className="pt-4 border-t border-gray-100">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <Truck size={16} className="text-green-600" />
+                                            <span className="font-semibold text-gray-700">Delivery Charges</span>
+                                        </div>
+
+                                        {deliveryLocation ? (
+                                            <div className="space-y-2 text-sm bg-green-50 p-3 rounded-xl">
+                                                {/* Base Fee */}
+                                                <div className="flex justify-between text-gray-600">
+                                                    <span>Base Fee (0-20km)</span>
+                                                    <span>LKR {deliveryFee.baseFee}</span>
+                                                </div>
+
+                                                {/* Distance Info */}
+                                                {deliveryFee.distanceKm > 0 && (
+                                                    <div className="flex justify-between text-gray-500">
+                                                        <span>Distance: {deliveryFee.distanceKm} km</span>
+                                                    </div>
+                                                )}
+
+                                                {/* Distance Surcharge */}
+                                                {deliveryFee.distanceCost > 0 && (
+                                                    <div className="flex justify-between text-blue-600">
+                                                        <span>+ Extra {deliveryFee.extraDistance} km</span>
+                                                        <span>LKR {deliveryFee.distanceCost}</span>
+                                                    </div>
+                                                )}
+
+                                                {/* Weight Surcharge */}
+                                                {deliveryFee.weightCost > 0 && (
+                                                    <div className="flex justify-between text-orange-600">
+                                                        <span>+ Heavy Load ({deliveryFee.extraWeight} kg)</span>
+                                                        <span>LKR {deliveryFee.weightCost}</span>
+                                                    </div>
+                                                )}
+
+                                                {/* Delivery Total */}
+                                                <div className="flex justify-between font-bold text-green-700 pt-2 border-t border-green-200">
+                                                    <span>Delivery Total</span>
+                                                    <span>LKR {deliveryFee.total}</span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-xl">
+                                                <p className="flex items-center gap-2">
+                                                    <MapPin size={14} />
+                                                    Set delivery location to calculate fee
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Grand Total */}
+                                    <div className="border-t border-gray-200 pt-4 flex justify-between items-end">
+                                        <span className="font-bold text-gray-800">Grand Total</span>
+                                        <span className="text-2xl font-bold text-harvest-dark">
+                                            LKR {total.toLocaleString()}
+                                        </span>
                                     </div>
                                 </div>
 
-                                <button 
-                                    onClick={() => navigate('/checkout')}
-                                    className="w-full bg-harvest-primary hover:bg-harvest-dark text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-green-200 mb-4"
+                                <button
+                                    onClick={handleProceedToCheckout}
+                                    disabled={!deliveryLocation}
+                                    className={`w-full font-bold py-4 rounded-xl transition-colors shadow-lg mb-4 ${deliveryLocation
+                                            ? 'bg-harvest-primary hover:bg-harvest-dark text-white shadow-green-200'
+                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        }`}
                                 >
-                                    Proceed to Checkout
+                                    {deliveryLocation ? 'Proceed to Checkout' : 'Set Delivery Location First'}
                                 </button>
 
                                 <p className="text-xs text-center text-gray-400">
